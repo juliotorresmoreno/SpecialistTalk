@@ -1,0 +1,7 @@
+description: Internal server error
+schema:
+  type: object
+  description: The request could not be processed because something on the server or the trello integration is not working
+  properties:
+    message:
+      type: string

@@ -1,0 +1,46 @@
+post:
+  tags:
+    - auth
+
+  produces:
+    - application/json
+
+  consumes:
+    - application/json
+
+  parameters:
+    - in: body
+      name: Credential
+      description: Auth in api.
+
+      schema:
+        type: object
+        required:
+          - password
+          - email
+        properties:
+          email:
+            type: string
+          password:
+            type: string
+          username:
+            type: string
+          name:
+            type: string
+          lastName:
+            type: string
+
+  operationId: Create user
+  responses:
+    201:
+      description: Created
+      schema:
+        type: object
+        description: User has been created
+        properties:
+          id:
+            type: string
+    403:
+      $ref: "../common/error-403.yml"
+    500:
+      $ref: "../common/error-500.yml"

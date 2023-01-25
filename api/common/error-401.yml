@@ -1,0 +1,7 @@
+description: Unauthorized
+schema:
+  type: object
+  description:
+  properties:
+    message:
+      type: string

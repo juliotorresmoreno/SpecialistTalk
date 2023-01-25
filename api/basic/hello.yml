@@ -1,0 +1,14 @@
+get:
+  produces:
+    - text/plain
+
+  operationId: Hello
+  responses:
+    200:
+      description: returns a greeting
+      schema:
+        type: object
+        description: A standard response for state validation
+        properties:
+          message:
+            type: string

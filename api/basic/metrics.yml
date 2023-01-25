@@ -1,0 +1,10 @@
+get:
+  produces:
+    - text/plain
+
+  operationId: Metrics
+  responses:
+    200:
+      description: returns metrics
+      schema:
+        type: string

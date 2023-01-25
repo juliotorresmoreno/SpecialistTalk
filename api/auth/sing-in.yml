@@ -1,0 +1,62 @@
+post:
+  tags:
+    - auth
+
+  produces:
+    - application/json
+
+  consumes:
+    - application/json
+
+  parameters:
+    - in: body
+      name: Credential
+      description: Auth in api.
+
+      schema:
+        type: object
+        required:
+          - password
+          - email
+        properties:
+          email:
+            type: string
+          password:
+            type: string
+
+  operationId: Login user
+  responses:
+    200:
+      description: Logged
+      schema:
+        type: object
+        description: User has been created
+        properties:
+          id:
+            type: number
+          email:
+            type: string
+          username:
+            type: string
+          name:
+            type: string
+          lastname:
+            type: string
+          date_birth:
+            type: string
+          imgSrc:
+            type: string
+          country:
+            type: string
+          nationality:
+            type: string
+          facebook:
+            type: string
+          linkedin:
+            type: string
+    401:
+      $ref: "../common/error-401.yml"
+    403:
+      $ref: "../common/error-403.yml"
+    500:
+      $ref: "../common/error-500.yml"

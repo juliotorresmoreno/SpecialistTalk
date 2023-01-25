@@ -1,0 +1,7 @@
+description: Bad request
+schema:
+  type: object
+  description: the user has made a mistake in the information sent to the server
+  properties:
+    message:
+      type: string
