@@ -27,7 +27,7 @@ const SingInForm: React.FC<SingInFormProps> = ({ onSubmit, errors }) => {
   }
   return (
     <Form onSubmit={defaultSubmit}>
-      <Form.Group className="mb-3" controlId="formBasicEmail">
+      <Form.Group className="mb-3" controlId="form-email">
         <Form.Label>Email address</Form.Label>
         <Form.Control
           type="email"
@@ -40,7 +40,7 @@ const SingInForm: React.FC<SingInFormProps> = ({ onSubmit, errors }) => {
         ) : null}
       </Form.Group>
 
-      <Form.Group className="mb-3" controlId="formBasicPassword">
+      <Form.Group className="mb-3" controlId="form-password">
         <Form.Label>Password</Form.Label>
         <Form.Control
           type="password"
