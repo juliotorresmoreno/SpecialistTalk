@@ -3,12 +3,14 @@ package db
 import (
 	"log"
 
+	"github.com/juliotorresmoreno/freelive/configs"
 	"github.com/juliotorresmoreno/freelive/model"
 )
 
 // Migrate s
 func Migrate() {
-	conn, err := NewEngigne()
+	conf := configs.GetConfig()
+	conn, err := NewEngigne(conf.Database)
 	if err != nil {
 		log.Fatal(err)
 	}

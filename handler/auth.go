@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/juliotorresmoreno/freelive/configs"
 	"github.com/juliotorresmoreno/freelive/db"
 	"github.com/juliotorresmoreno/freelive/helper"
 	"github.com/juliotorresmoreno/freelive/model"
@@ -26,11 +27,10 @@ type POSTSingUpPayload struct {
 }
 
 func (el *AuthHandler) POSTSingUp(c echo.Context) error {
-	conn, err := db.NewEngigne()
+	conn, err := db.GetConnectionPool()
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
-	defer conn.Close()
 
 	p := &POSTSingUpPayload{}
 	err = c.Bind(p)
@@ -52,7 +52,10 @@ func (el *AuthHandler) POSTSingUp(c echo.Context) error {
 	u.LastName = p.LastName
 	u.Username = p.Username
 	u.ValidPassword = p.Password
-	u.ACL = model.NewACL(p.Username, model.RolUser)
+	u.ACL, err = model.NewACL(p.Username, model.RolUser)
+	if err != nil {
+		return helper.MakeHTTPError(http.StatusBadRequest, err)
+	}
 
 	if err = u.Check(); err != nil {
 		return helper.MakeHTTPError(http.StatusBadRequest, err)
@@ -79,14 +82,14 @@ type POSTLoginPayload struct {
 }
 
 func (el *AuthHandler) POSTLogin(c echo.Context) error {
-	conn, err := db.NewEngigne()
+	conn, err := db.GetConnectionPool()
 	if err != nil {
 		return &echo.HTTPError{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		}
 	}
-	defer conn.Close()
+
 	p := &POSTLoginPayload{}
 	err = c.Bind(p)
 	if err != nil {
@@ -131,11 +134,11 @@ func StringWithCharset(length int, charset string) string {
 }
 
 func (el *AuthHandler) POSTRecovery(c echo.Context) error {
-	conn, err := db.NewEngigne()
+	conn, err := db.GetConnectionPool()
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
-	defer conn.Close()
+
 	p := &CredentialsRecovery{}
 	err = c.Bind(p)
 	if err != nil {
@@ -153,22 +156,22 @@ func (el *AuthHandler) POSTRecovery(c echo.Context) error {
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
-	return c.String(204, "")
+	return c.String(http.StatusNoContent, "")
 }
 
 // CredentialsReset s
-type CredentialsReset struct {
+type POSTResetPayload struct {
 	Password string
 	Token    string
 }
 
 func (el *AuthHandler) POSTReset(c echo.Context) error {
-	conn, err := db.NewEngigne()
+	conn, err := db.GetConnectionPool()
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
-	defer conn.Close()
-	p := &CredentialsReset{}
+
+	p := &POSTResetPayload{}
 	err = c.Bind(p)
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
@@ -198,9 +201,31 @@ func (el *AuthHandler) POSTReset(c echo.Context) error {
 	return c.String(204, "")
 }
 
+func (that *AuthHandler) GETSession(c echo.Context) error {
+	_session := c.Get("session")
+	if _session == nil {
+		return echo.NewHTTPError(401, "Unauthorized")
+	}
+
+	session := _session.(*model.User)
+	conf := configs.GetConfig()
+	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
+	if err != nil {
+		return err
+	}
+
+	u := &model.User{}
+	_, err = conn.Where("id = ?", session.ID).Get(u)
+	if err != nil {
+		return echo.NewHTTPError(501, helper.ParseError(err).Error())
+	}
+	return c.JSON(200, u)
+}
+
 // AuthHandler s
 func AttachAuth(g *echo.Group) {
 	c := AuthHandler{}
+	g.GET("/session", c.GETSession)
 	g.POST("/sing-up", c.POSTSingUp)
 	g.POST("/sing-in", c.POSTLogin)
 	g.POST("/recovery", c.POSTRecovery)

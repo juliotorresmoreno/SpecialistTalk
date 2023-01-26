@@ -1,12 +1,14 @@
 package db
 
-import "github.com/go-xorm/xorm"
+import (
+	"github.com/go-xorm/xorm"
+	"github.com/juliotorresmoreno/freelive/model"
+)
 
 type Engine struct {
 	permisionQueryRead  string
 	permisionQueryWrite string
-	user                string
-	group               string
+	user                *model.User
 	*xorm.Engine
 }
 
@@ -41,7 +43,6 @@ func (e *Engine) InsertOne(bean interface{}) (int64, error) {
 func (e *Engine) NewSession() *Session {
 	return &Session{
 		user:                e.user,
-		group:               e.group,
 		permisionQueryRead:  e.permisionQueryRead,
 		permisionQueryWrite: e.permisionQueryWrite,
 		Session:             e.Engine.NewSession(),
@@ -54,4 +55,8 @@ func (e *Engine) Where(query interface{}, args ...interface{}) *Session {
 
 func (e *Engine) Table(tableNameOrBean interface{}) *Session {
 	return e.NewSession().Table(tableNameOrBean)
+}
+
+func (e *Engine) SessionWithACL() *xorm.Session {
+	return e.NewSession().SessionWithACL()
 }

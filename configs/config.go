@@ -13,8 +13,10 @@ import (
 )
 
 type Database struct {
-	Driver string `json:"driver"     yaml:"driver"`
-	DSN    string `json:"dsn"        yaml:"dsn"`
+	Driver       string `json:"driver"       yaml:"driver"`
+	DSN          string `json:"dsn"          yaml:"dsn"`
+	MaxOpenConns int    `json:"maxOpenConns" yaml:"maxOpenConns"`
+	MaxIdleConns int    `json:"maxIdleConns" yaml:"maxIdleConns"`
 }
 
 type Redis struct {
@@ -25,16 +27,23 @@ type Redis struct {
 
 // Config s
 type Config struct {
-	Secret   string   `json:"secret"   yaml:"secret"`
-	Host     string   `json:"host"     yaml:"host"`
-	Port     string   `json:"port"     yaml:"port"`
-	Database Database `json:"database" yaml:"database"`
-	Redis    Redis    `json:"redis"    yaml:"redis"`
+	Secret          string    `json:"secret"          yaml:"secret"`
+	Host            string    `json:"host"            yaml:"host"`
+	Port            string    `json:"port"            yaml:"port"`
+	ReadBufferSize  int       `json:"readBufferSize"  yaml:"readBufferSize"`
+	WriteBufferSize int       `json:"writeBufferSize" yaml:"writeBufferSize"`
+	Database        *Database `json:"database"        yaml:"database"`
+	Redis           *Redis    `json:"redis"           yaml:"redis"`
 }
 
-var conf Config
+var conf Config = Config{
+	Database:        &Database{},
+	Redis:           &Redis{},
+	ReadBufferSize:  0,
+	WriteBufferSize: 0,
+}
 
-func fromEnvfallbackString(value string, zero string, some string) string {
+func fromEnvfString(value string, zero string, some string) string {
 	val := os.Getenv(zero)
 	if val != "" {
 		return val
@@ -45,7 +54,7 @@ func fromEnvfallbackString(value string, zero string, some string) string {
 	return some
 }
 
-func fromEnvfallbackInt(value int, zero string, some int) int {
+func fromEnvfInt(value int, zero string, some int) int {
 	val := os.Getenv(zero)
 	if val != "" {
 		v, err := strconv.Atoi(val)
@@ -67,12 +76,15 @@ func getConfigArgs() {
 		log.Fatal(err)
 	}
 	configPathDefault := path.Join(dir, "config.yml")
-	flag.StringVar(&configPath, "c", configPathDefault, "Archivo de configuracion")
+	_, err = os.Open(configPathDefault)
+	if err != nil {
+		return
+	}
+	flag.StringVar(&configPath, "c", configPathDefault, "configuration filepath")
 	flag.Parse()
 }
 
-// Init s
-func Init() {
+func init() {
 	getConfigArgs()
 	f, err := os.Open(configPath)
 	if err == nil {
@@ -84,16 +96,20 @@ func Init() {
 
 	_ = godotenv.Load()
 
-	conf.Host = fromEnvfallbackString(conf.Host, "HOST", "")
-	conf.Port = fromEnvfallbackString(conf.Port, "PORT", "1323")
-	conf.Secret = fromEnvfallbackString(conf.Secret, "SECRET", "123456")
+	conf.Host = fromEnvfString(conf.Host, "HOST", "")
+	conf.Port = fromEnvfString(conf.Port, "PORT", "1323")
+	conf.Secret = fromEnvfString(conf.Secret, "SECRET", "123456")
+	conf.ReadBufferSize = fromEnvfInt(conf.ReadBufferSize, "READ_BUFFER_SIZE", 2048)
+	conf.WriteBufferSize = fromEnvfInt(conf.WriteBufferSize, "WRITE_BUFFER_SIZE", 2048)
 
-	conf.Redis.Addr = fromEnvfallbackString(conf.Redis.Addr, "REDIS_ADDR", "localhost:6379")
-	conf.Redis.DB = fromEnvfallbackInt(conf.Redis.DB, "REDIS_DB", 0)
-	conf.Redis.Password = fromEnvfallbackString(conf.Redis.Password, "REDIS_PWD", "")
+	conf.Redis.Addr = fromEnvfString(conf.Redis.Addr, "REDIS_ADDR", "localhost:6379")
+	conf.Redis.DB = fromEnvfInt(conf.Redis.DB, "REDIS_DB", 0)
+	conf.Redis.Password = fromEnvfString(conf.Redis.Password, "REDIS_PWD", "")
 
-	conf.Database.DSN = fromEnvfallbackString(conf.Database.DSN, "DATABASE_DSN", "")
-	conf.Database.Driver = fromEnvfallbackString(conf.Database.Driver, "DATABASE_DRIVER", "")
+	conf.Database.DSN = fromEnvfString(conf.Database.DSN, "DATABASE_DSN", "")
+	conf.Database.Driver = fromEnvfString(conf.Database.Driver, "DATABASE_DRIVER", "")
+	conf.Database.MaxOpenConns = fromEnvfInt(conf.Redis.DB, "MAX_OPEN_CONNS", 50)
+	conf.Database.MaxIdleConns = fromEnvfInt(conf.Redis.DB, "MAX_IDLE_CONNS", 5)
 }
 
 // GetConfig s
