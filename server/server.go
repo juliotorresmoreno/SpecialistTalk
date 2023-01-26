@@ -1,7 +1,7 @@
 package server
 
 import (
-	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -17,16 +17,17 @@ type ServerHTTP struct {
 	*echo.Echo
 }
 
-// Listen s
 func (s *ServerHTTP) Listen() error {
 	conf := configs.GetConfig()
-	host := fmt.Sprintf("%v:%v", conf.Host, conf.Port)
+	host := conf.Host + ":" + conf.Port
 	return s.Start(host)
 }
 
 func NewServer() *ServerHTTP {
 	e := echo.New()
 	svr := &ServerHTTP{e}
+
+	conf := configs.GetConfig()
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -49,7 +50,6 @@ func NewServer() *ServerHTTP {
 	e.Use(middleware.CORS())
 	// e.Use(middleware.CSRF())
 
-	e.Static("/", "website/dist")
 	handler.AttachWS(e.Group("/ws", middleware_app.Session))
 
 	handler.AttachSwaggerApi(e.Group("/docs"))
@@ -57,6 +57,18 @@ func NewServer() *ServerHTTP {
 	api := e.Group("/api/v1", middleware_app.Session)
 	handler.AttachAuth(api.Group("/auth"))
 	handler.AttachUsers(api.Group("/users"))
+
+	static := e.Group("/*")
+	if conf.Env == "development" {
+		static.Use(middleware_app.NoCache)
+	}
+	static.GET("", func(c echo.Context) error {
+		_, err := os.Lstat("website/dist/" + c.Request().URL.Path)
+		if err != nil {
+			return c.File("website/dist/index.html")
+		}
+		return c.File("website/dist/" + c.Request().URL.Path)
+	})
 
 	return svr
 }

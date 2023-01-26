@@ -27,6 +27,7 @@ type Redis struct {
 
 // Config s
 type Config struct {
+	Env             string    `json:"env"             yaml:"env"`
 	Secret          string    `json:"secret"          yaml:"secret"`
 	Host            string    `json:"host"            yaml:"host"`
 	Port            string    `json:"port"            yaml:"port"`
@@ -99,6 +100,7 @@ func init() {
 	conf.Host = fromEnvfString(conf.Host, "HOST", "")
 	conf.Port = fromEnvfString(conf.Port, "PORT", "1323")
 	conf.Secret = fromEnvfString(conf.Secret, "SECRET", "123456")
+	conf.Env = fromEnvfString(conf.Env, "ENV", "development")
 	conf.ReadBufferSize = fromEnvfInt(conf.ReadBufferSize, "READ_BUFFER_SIZE", 2048)
 	conf.WriteBufferSize = fromEnvfInt(conf.WriteBufferSize, "WRITE_BUFFER_SIZE", 2048)
 
