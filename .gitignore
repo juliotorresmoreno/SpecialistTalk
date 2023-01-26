@@ -16,3 +16,5 @@ vendor/
 http
 config.yml
 .env
+node_modules
+dist/

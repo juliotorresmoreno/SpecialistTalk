@@ -49,7 +49,7 @@ func NewServer() *ServerHTTP {
 	e.Use(middleware.CORS())
 	// e.Use(middleware.CSRF())
 
-	e.Static("/", "website")
+	e.Static("/", "website/dist")
 	handler.AttachWS(e.Group("/ws", middleware_app.Session))
 
 	handler.AttachSwaggerApi(e.Group("/docs"))
