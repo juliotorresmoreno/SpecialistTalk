@@ -13,8 +13,10 @@ import (
 )
 
 type Database struct {
-	Driver string `json:"driver"     yaml:"driver"`
-	DSN    string `json:"dsn"        yaml:"dsn"`
+	Driver       string `json:"driver"       yaml:"driver"`
+	DSN          string `json:"dsn"          yaml:"dsn"`
+	MaxOpenConns int    `json:"maxOpenConns" yaml:"maxOpenConns"`
+	MaxIdleConns int    `json:"maxIdleConns" yaml:"maxIdleConns"`
 }
 
 type Redis struct {
@@ -25,14 +27,17 @@ type Redis struct {
 
 // Config s
 type Config struct {
-	Secret   string   `json:"secret"   yaml:"secret"`
-	Host     string   `json:"host"     yaml:"host"`
-	Port     string   `json:"port"     yaml:"port"`
-	Database Database `json:"database" yaml:"database"`
-	Redis    Redis    `json:"redis"    yaml:"redis"`
+	Secret   string    `json:"secret"   yaml:"secret"`
+	Host     string    `json:"host"     yaml:"host"`
+	Port     string    `json:"port"     yaml:"port"`
+	Database *Database `json:"database" yaml:"database"`
+	Redis    *Redis    `json:"redis"    yaml:"redis"`
 }
 
-var conf Config
+var conf Config = Config{
+	Database: &Database{},
+	Redis:    &Redis{},
+}
 
 func fromEnvfallbackString(value string, zero string, some string) string {
 	val := os.Getenv(zero)
@@ -66,13 +71,15 @@ func getConfigArgs() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if os.Getenv("ENV") != "TEST" {
+		return
+	}
 	configPathDefault := path.Join(dir, "config.yml")
 	flag.StringVar(&configPath, "c", configPathDefault, "Archivo de configuracion")
 	flag.Parse()
 }
 
-// Init s
-func Init() {
+func init() {
 	getConfigArgs()
 	f, err := os.Open(configPath)
 	if err == nil {
@@ -94,6 +101,8 @@ func Init() {
 
 	conf.Database.DSN = fromEnvfallbackString(conf.Database.DSN, "DATABASE_DSN", "")
 	conf.Database.Driver = fromEnvfallbackString(conf.Database.Driver, "DATABASE_DRIVER", "")
+	conf.Database.MaxOpenConns = fromEnvfallbackInt(conf.Redis.DB, "MAX_OPEN_CONNS", 50)
+	conf.Database.MaxIdleConns = fromEnvfallbackInt(conf.Redis.DB, "MAX_IDLE_CONNS", 5)
 }
 
 // GetConfig s

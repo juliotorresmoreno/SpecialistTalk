@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"time"
 
@@ -36,51 +37,37 @@ type Rol string
 const RolUser = "user"
 const RolAdmin = "admin"
 
-func NewACL(user string, groups ...string) ACL {
-	group := ""
-	if len(groups) > 0 {
-		group = strings.Join(groups, ",")
+func NewACL(user string, group string) (*ACL, error) {
+	if group != RolUser && group != RolAdmin {
+		return &ACL{}, errors.New("group is required")
 	}
-	ACL := ACL{
+	ACL := &ACL{
 		Owner: user,
 		Group: group,
-		Groups: map[string]Group{
-			"user": {
-				Read:  true,
-				Write: false,
-			},
-			"admin": {
-				Read:  true,
-				Write: true,
-			},
-		},
 	}
-	return ACL
+	return ACL, nil
 }
 
 // User s
 type User struct {
-	ID       int    `xorm:"id integer not null autoincr pk"      valid:""`
-	Username string `xorm:"username varchar(20) not null unique" valid:"username,required"`
-	Email    string `xorm:"email varchar(200) not null unique"   valid:"email,required"`
-	Name     string `xorm:"name varchar(50) not null"            valid:"name,required"`
-	LastName string `xorm:"lastname varchar(50) not null"        valid:"name,required"`
-
-	DateBirth   time.Time `xorm:"date_birth DATE"`
-	ImgSrc      string    `xorm:"imgSrc text"`
-	Country     string    `xorm:"country varchar(2)"`
-	Nationality string    `xorm:"nationality varchar(2)"`
-	Facebook    string    `xorm:"facebook varchar(255)"`
-	Linkedin    string    `xorm:"linkedin varchar(255)"`
-
-	Password      string `xorm:"password varchar(100) not null"`
-	ValidPassword string `xorm:"-"                              valid:"password"`
-	RecoveryToken string `xorm:"recovery_token varchar(100) not null"`
-
-	ACL       ACL       `xorm:"acl json not null"                    valid:"required"`
-	CreatedAt time.Time `xorm:"created_at created"`
-	UpdatedAt time.Time `xorm:"updated_at updated"`
-	Version   int       `xorm:"version version"`
+	ID            int       `xorm:"id integer not null autoincr pk"           valid:""`
+	Username      string    `xorm:"username varchar(20) not null unique"      valid:"username,required"`
+	Email         string    `xorm:"email varchar(200) not null unique"        valid:"email,required"`
+	Name          string    `xorm:"name varchar(50) not null"                 valid:"name,required"`
+	LastName      string    `xorm:"lastname varchar(50) not null"             valid:"name,required"`
+	DateBirth     time.Time `xorm:"date_birth DATE"`
+	ImgSrc        string    `xorm:"imgSrc text"`
+	Country       string    `xorm:"country varchar(2)"`
+	Nationality   string    `xorm:"nationality varchar(2)"`
+	Facebook      string    `xorm:"facebook varchar(255)"`
+	Linkedin      string    `xorm:"linkedin varchar(255)"`
+	Password      string    `xorm:"password varchar(100) not null"                                json:"-"`
+	ValidPassword string    `xorm:"-"                                         valid:"password"    json:"-"`
+	RecoveryToken string    `xorm:"recovery_token varchar(100) not null"`
+	ACL           *ACL      `xorm:"acl json not null"                         valid:"required"`
+	CreatedAt     time.Time `xorm:"created_at created"`
+	UpdatedAt     time.Time `xorm:"updated_at updated"`
+	Version       int       `xorm:"version version"`
 }
 
 // TableName s
@@ -164,7 +151,10 @@ func (that *User) UnmarshalJSON(b []byte) error {
 	that.Facebook = u.Facebook
 	that.Linkedin = u.Linkedin
 
-	that.ACL = NewACL(u.Username, "user")
+	that.ACL, err = NewACL(u.Username, RolUser)
+	if err != nil {
+		return err
+	}
 	err = that.SetPassword(u.Password)
 	if err != nil {
 		return err

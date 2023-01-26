@@ -11,17 +11,16 @@ import (
 type Session struct {
 	permisionQueryRead  string
 	permisionQueryWrite string
-	user                string
-	group               string
+	user                *model.User
 	*xorm.Session
 }
 
 func (e *Session) getPermisionQueryRead() string {
-	return fmt.Sprintf(e.permisionQueryRead, e.user, e.group)
+	return fmt.Sprintf(e.permisionQueryRead, e.user.Username, e.user.ACL.Group)
 }
 
 func (e *Session) getPermisionQueryWrite() string {
-	return fmt.Sprintf(e.permisionQueryWrite, e.user, e.group)
+	return fmt.Sprintf(e.permisionQueryWrite, e.user.Username, e.user.ACL.Group)
 }
 
 func (e *Session) Get(bean interface{}) (bool, error) {
@@ -38,6 +37,13 @@ func (e *Session) Update(bean interface{}, condiBean ...interface{}) (int64, err
 	return e.Session.Update(bean, condiBean...)
 }
 
+func (e *Session) SessionWithACL() *xorm.Session {
+	if e.permisionQueryWrite != "" {
+		return e.Session.Where(e.getPermisionQueryWrite())
+	}
+	return e.Session
+}
+
 var aclType = reflect.ValueOf(model.ACL{}).Type()
 
 func (e *Session) Insert(bean ...interface{}) (int64, error) {
@@ -48,7 +54,10 @@ func (e *Session) Insert(bean ...interface{}) (int64, error) {
 		}
 		field = field.Elem().FieldByName("ACL")
 		if field.CanSet() && field.Type() == aclType {
-			acl := model.NewACL(e.user)
+			acl, err := model.NewACL(e.user.Username, e.user.ACL.Group)
+			if err != nil {
+				return 0, err
+			}
 			field.Set(reflect.ValueOf(acl))
 		}
 	}
@@ -63,7 +72,10 @@ func (e *Session) InsertOne(bean interface{}) (int64, error) {
 	}
 	field = field.Elem().FieldByName("ACL")
 	if field.CanSet() && field.Type() == aclType && field.IsZero() {
-		acl := model.NewACL(e.user)
+		acl, err := model.NewACL(e.user.Username, e.user.ACL.Group)
+		if err != nil {
+			return 0, err
+		}
 		field.Set(reflect.ValueOf(acl))
 	}
 	return e.Session.InsertOne(bean)

@@ -4,6 +4,8 @@ port: 4080
 database:
   driver: postgres
   dsn: postgres://macabro:macabro@localhost/macabro
+  maxOpenConns: 50
+  maxIdleConns: 5
 redis:
   addr: "localhost:6379"
   password: ""

@@ -8,6 +8,7 @@ import (
 
 	"github.com/juliotorresmoreno/freelive/configs"
 	"github.com/juliotorresmoreno/freelive/handler"
+	middleware_app "github.com/juliotorresmoreno/freelive/middleware"
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -43,8 +44,10 @@ func NewServer() *ServerHTTP {
 	e.Use(middleware.CORS())
 	// e.Use(middleware.CSRF())
 
-	api := e.Group("/api/v1")
 	handler.AttachSwaggerApi(e.Group("/docs"))
+
+	api := e.Group("/api/v1", middleware_app.Session)
+
 	handler.AttachAuth(api.Group("/auth"))
 
 	handler.AttachUsers(api.Group("/users"))
