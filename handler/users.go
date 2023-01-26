@@ -11,10 +11,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type UsersController struct {
+type UsersHandler struct {
 }
 
-func (that *UsersController) GET(c echo.Context) error {
+func (that *UsersHandler) GET(c echo.Context) error {
 	_session := c.Get("session")
 	if _session == nil {
 		return echo.NewHTTPError(401, "Unauthorized")
@@ -37,7 +37,7 @@ func (that *UsersController) GET(c echo.Context) error {
 	return c.JSON(200, u)
 }
 
-func (that *UsersController) PUT(c echo.Context) error {
+func (that *UsersHandler) PUT(c echo.Context) error {
 	u := &model.User{}
 	if err := c.Bind(u); err != nil {
 		return echo.NewHTTPError(406, helper.ParseError(err).Error())
@@ -56,7 +56,7 @@ func (that *UsersController) PUT(c echo.Context) error {
 	return c.JSON(202, u)
 }
 
-func (that *UsersController) PATCH(c echo.Context) error {
+func (that *UsersHandler) PATCH(c echo.Context) error {
 	_session := c.Get("session")
 	if _session == nil {
 		return echo.NewHTTPError(401, "Unauthorized")
@@ -103,7 +103,7 @@ func (that *UsersController) PATCH(c echo.Context) error {
 
 // AttachUsers s
 func AttachUsers(g *echo.Group) {
-	u := &UsersController{}
+	u := &UsersHandler{}
 	g.GET("/session", u.GET)
 	g.GET("/:user_id", u.GET)
 	g.PUT("", u.PUT)
