@@ -1,0 +1,36 @@
+#app {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+#container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#container > div.content {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  grid-area: content;
+}
+
+#container > div.content > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+aside {
+  width: 200px;
+}
+
+#chats {
+}
+
+#chats > div {
+  float: right;
+}

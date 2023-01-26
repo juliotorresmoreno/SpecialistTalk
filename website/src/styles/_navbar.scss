@@ -1,0 +1,19 @@
+
+nav.bg-purple {
+  background-color: var(--bs-purple);
+  color: var(--bs-light);
+  padding: 10px;
+}
+
+nav {
+  margin-bottom: var(--spacing-v1);
+}
+
+nav ul {
+  list-style: none;
+}
+
+nav ul.nav {
+  --bs-nav-link-disabled-color: var(--bs-gray-400);
+  --bs-nav-link-hover-color: var(--bs-gray-300)
+}
