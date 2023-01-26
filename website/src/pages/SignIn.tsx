@@ -1,5 +1,7 @@
 import React from 'react'
+import { Col, Row } from 'react-bootstrap'
 import Header from '../components/Header'
+import SingInForm from '../components/SingInForm'
 
 const SignInPage: React.FC = () => {
   const header = {
@@ -10,7 +12,11 @@ const SignInPage: React.FC = () => {
   return (
     <>
       <Header {...header} />
-      <main>SignIn</main>
+      <main>
+        <Row>
+          <Col md={{ span: 6 }}></Col>
+        </Row>
+      </main>
     </>
   )
 }
