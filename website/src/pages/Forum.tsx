@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import Header from '../components/Header'
 import styl from 'styled-components'
 
@@ -28,8 +28,8 @@ const ForumPage: React.FC = () => {
           <a className="nav-link active" href="#">
             Active
           </a>
-          {links.map(([link, title]) => (
-            <a className="nav-link" href={link}>
+          {links.map(([link, title], index) => (
+            <a key={'link-' + index} className="nav-link" href={link}>
               {title}
             </a>
           ))}

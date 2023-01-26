@@ -1,25 +1,35 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
 import { Link, useLocation } from 'react-router-dom'
 import classnames from 'classnames'
 import useOnScreen from '../hooks/useOnScreen'
+import Modal from './Modal'
+import SingInForm from './SingInForm'
+import SingUpForm from './SingUpForm'
 
 type NavBarProps = {} & React.PropsWithChildren
 
 const NavBar: React.FC<NavBarProps> = (props) => {
   const toggleBtnRef = useRef<HTMLButtonElement | null>()
   const isVisible = useOnScreen(toggleBtnRef)
+  const [showModal, setShowModal] = useState<Link | null>(null)
   const location = useLocation()
   const links0 = [
     ['/forum', 'Foro'],
     //['/recommends', 'Recomendado'],
     ['/social', 'Social'],
   ]
-  const links1 = [
-    ['/sign-in', 'Ingresar'],
-    ['/sign-up', 'Registrarse'],
+  const links1: Link[] = [
+    {
+      title: 'Ingresar',
+      form: <SingInForm onSubmit={() => {}} errors={{}} />,
+    },
+    {
+      title: 'Registrate',
+      form: <SingUpForm onSubmit={() => {}} errors={{}} />,
+    },
   ]
   const toggleNav = () => {
     if (isVisible) toggleBtnRef.current?.click()
@@ -35,6 +45,23 @@ const NavBar: React.FC<NavBarProps> = (props) => {
       </Link>
     )
   }
+  type Link = {
+    title: string
+    form: React.ReactNode
+  }
+
+  const renderLinksAuth = (link: Link) => {
+    return (
+      <Link
+        key={link.title}
+        to=""
+        className="nav-link"
+        onClick={() => setShowModal(link)}
+      >
+        {link.title}
+      </Link>
+    )
+  }
   return (
     <Navbar collapseOnSelect expand="lg" bg="purple" variant="dark">
       <Container>
@@ -47,8 +74,16 @@ const NavBar: React.FC<NavBarProps> = (props) => {
         />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto">{links0.map(renderLinks)}</Nav>
-          <Nav>{links1.map(renderLinks)}</Nav>
+          <Nav>{links1.map(renderLinksAuth)}</Nav>
         </Navbar.Collapse>
+        <Modal
+          show={showModal !== null}
+          title={showModal?.title ?? ''}
+          handleSave={() => {}}
+          handleClose={() => setShowModal(null)}
+        >
+          {showModal?.form}
+        </Modal>
       </Container>
     </Navbar>
   )
