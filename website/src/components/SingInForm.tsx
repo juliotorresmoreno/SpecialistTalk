@@ -1,5 +1,8 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Button, Form } from 'react-bootstrap'
+import config from '../config'
+import withFormHandler from '../hoc/withFormHandler'
+import useFormValue from '../hooks/useFormValue'
 
 type formData = {
   email: string
@@ -11,20 +14,26 @@ type RequiredFieldsOnly<T> = {
 }
 
 type SingInFormProps = {
+  isLoading?: boolean
   onSubmit: (payload: formData) => void
   errors: RequiredFieldsOnly<formData> & {
     message?: string
   }
 }
 
-const SingInForm: React.FC<SingInFormProps> = ({ onSubmit, errors }) => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+const SingInForm: React.FC<SingInFormProps> = ({
+  onSubmit,
+  errors = {},
+  isLoading = false,
+}) => {
+  const [email, setEmail] = useFormValue()
+  const [password, setPassword] = useFormValue()
   const defaultSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault()
 
     onSubmit({ email, password })
   }
+  if (isLoading) return <>Loading</>
   return (
     <Form onSubmit={defaultSubmit}>
       <Form.Group className="mb-3" controlId="form-email">
@@ -33,7 +42,7 @@ const SingInForm: React.FC<SingInFormProps> = ({ onSubmit, errors }) => {
           type="email"
           placeholder="Enter email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={setEmail}
         />
         {errors.email ? (
           <Form.Text className="text-muted">{errors.email}</Form.Text>
@@ -46,7 +55,7 @@ const SingInForm: React.FC<SingInFormProps> = ({ onSubmit, errors }) => {
           type="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={setPassword}
         />
         {errors.password ? (
           <Form.Text className="text-muted">{errors.password}</Form.Text>
@@ -63,4 +72,6 @@ const SingInForm: React.FC<SingInFormProps> = ({ onSubmit, errors }) => {
   )
 }
 
-export default SingInForm
+const url = config.baseUrl + '/auth/sing-in'
+
+export default withFormHandler<SingInFormProps>(SingInForm, 'POST', url)
