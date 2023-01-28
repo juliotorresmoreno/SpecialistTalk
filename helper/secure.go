@@ -12,7 +12,6 @@ import (
 	"io"
 	"log"
 	rand2 "math/rand"
-	"net/http"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
@@ -88,19 +87,21 @@ func Decrypt(key []byte, securemess string) (string, error) {
 	return string(cipherText), nil
 }
 
+type Session struct {
+	User  *model.User `json:"user"`
+	Token string      `json:"token"`
+}
+
 func MakeSession(c echo.Context, u *model.User) error {
 	token := bson.NewObjectId().Hex()
 	redisCli := services.NewRedis()
 	redisCli.Set(token, u.ID, 24*time.Hour)
 	go redisCli.Close()
 
-	c.SetCookie(&http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Path:     "/",
-		MaxAge:   60 * 60 * 10,
-		HttpOnly: true,
-	})
+	session := &Session{
+		Token: token,
+		User:  u,
+	}
 
-	return c.JSON(200, u)
+	return c.JSON(200, session)
 }

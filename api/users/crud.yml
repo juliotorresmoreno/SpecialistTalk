@@ -1,0 +1,43 @@
+definitions:
+  User:
+    $ref: "../schemas/user.yml"
+
+get:
+  tags:
+    - users
+
+  produces:
+    - application/json
+
+  operationId: Get users
+  responses:
+    200:
+      description:
+      schema:
+        $ref: "#/definitions/User"
+    401:
+      $ref: "../common/error-401.yml"
+    403:
+      $ref: "../common/error-403.yml"
+    500:
+      $ref: "../common/error-500.yml"
+
+patch:
+  tags:
+    - users
+
+  produces:
+    - application/json
+
+  operationId: Patch users
+  responses:
+    200:
+      description:
+      schema:
+        $ref: "#/definitions/User"
+    401:
+      $ref: "../common/error-401.yml"
+    403:
+      $ref: "../common/error-403.yml"
+    500:
+      $ref: "../common/error-500.yml"

@@ -104,7 +104,6 @@ func (that *UsersHandler) PATCH(c echo.Context) error {
 // AttachUsers s
 func AttachUsers(g *echo.Group) {
 	u := &UsersHandler{}
-	g.GET("/session", u.GET)
 	g.GET("/:user_id", u.GET)
 	g.PUT("", u.PUT)
 	g.PATCH("/:user_id", u.PATCH)
