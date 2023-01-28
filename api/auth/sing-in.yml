@@ -1,3 +1,7 @@
+definitions:
+  Session:
+    $ref: "../schemas/session.yml"
+
 post:
   tags:
     - auth
@@ -29,31 +33,8 @@ post:
     200:
       description: Logged
       schema:
-        type: object
-        description: User has been created
-        properties:
-          id:
-            type: number
-          email:
-            type: string
-          username:
-            type: string
-          name:
-            type: string
-          lastname:
-            type: string
-          date_birth:
-            type: string
-          imgSrc:
-            type: string
-          country:
-            type: string
-          nationality:
-            type: string
-          facebook:
-            type: string
-          linkedin:
-            type: string
+        $ref: "#/definitions/Session"
+
     401:
       $ref: "../common/error-401.yml"
     403:

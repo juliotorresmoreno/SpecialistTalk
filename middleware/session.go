@@ -12,11 +12,8 @@ import (
 
 func Session(handler echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		token := ""
-		cookie, _ := c.Cookie("token")
-		if cookie != nil {
-			token = cookie.Value
-		} else {
+		token := c.Request().Header.Get("X-API-Key")
+		if token == "" {
 			token = c.QueryParams().Get("token")
 		}
 		if token == "" {

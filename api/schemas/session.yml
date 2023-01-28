@@ -1,0 +1,7 @@
+type: object
+description: Session
+properties:
+  token:
+    type: string
+  user:
+    $ref: "./user.yml"
