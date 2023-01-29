@@ -7,20 +7,31 @@ import RecommendsPage from '../pages/Recommends'
 import SignInPage from '../pages/SignIn'
 import SignUpPage from '../pages/SignUp'
 import SocialPage from '../pages/Social'
+import { useAppSelector } from '../store/hooks'
 import Layout from './Layout'
 
 const App: React.FC = () => {
+  const session = useAppSelector((state) => state.auth.session)
+
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/forum" element={<ForumPage />} />
-        <Route path="/recommends" element={<RecommendsPage />} />
-        <Route path="/social" element={<SocialPage />} />
-        <Route path="/sign-in" element={<SignInPage />} />
-        <Route path="/sign-up" element={<SignUpPage />} />
+        {session ? (
+          <>
+            <Route path="/" element={<HomePage />} />
+          </>
+        ) : (
+          <>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/forum" element={<ForumPage />} />
+            <Route path="/recommends" element={<RecommendsPage />} />
+            <Route path="/social" element={<SocialPage />} />
+            <Route path="/sign-in" element={<SignInPage />} />
+            <Route path="/sign-up" element={<SignUpPage />} />
 
-        <Route path="*" element={<NotFoundPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </>
+        )}
       </Routes>
     </Layout>
   )

@@ -8,6 +8,9 @@ import useOnScreen from '../hooks/useOnScreen'
 import Modal from './Modal'
 import SingInForm from './SingInForm'
 import SingUpForm from './SingUpForm'
+import { Session } from '../models/session'
+import authSlice from '../features/auth'
+import { useAppDispatch } from '../store/hooks'
 
 type NavBarProps = {} & React.PropsWithChildren
 
@@ -16,6 +19,7 @@ const NavBar: React.FC<NavBarProps> = (props) => {
   const isVisible = useOnScreen(toggleBtnRef)
   const [showModal, setShowModal] = useState<Link | null>(null)
   const location = useLocation()
+  const dispatch = useAppDispatch()
   const links0 = [
     ['/forum', 'Foro'],
     //['/recommends', 'Recomendado'],
@@ -24,7 +28,14 @@ const NavBar: React.FC<NavBarProps> = (props) => {
   const links1: Link[] = [
     {
       title: 'Ingresar',
-      form: <SingInForm onSubmit={() => {}} errors={{}} />,
+      form: (
+        <SingInForm
+          onSuccess={(session: Session) => {
+            setShowModal(null)
+            dispatch(authSlice.actions.setSession(session))
+          }}
+        />
+      ),
     },
     {
       title: 'Registrate',
