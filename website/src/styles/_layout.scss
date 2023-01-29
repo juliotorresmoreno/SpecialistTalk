@@ -9,6 +9,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  background-color: aqua;
+  padding: 0;
 }
 
 #container > div.content {
@@ -29,8 +31,17 @@ aside {
 }
 
 #chats {
+  display: flex;
+  flex-direction: row-reverse;
+  padding: 0;
+  background-color: cadetblue;
 }
 
-#chats > div {
-  float: right;
+#chats .contacts {
+  padding: 10px;
+  width: 200px;
+  background-color: bisque;
+  line-height: 1rem;
+  text-align: center;
+  cursor: pointer;
 }
