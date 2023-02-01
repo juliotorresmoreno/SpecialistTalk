@@ -1,4 +1,5 @@
 import React from 'react'
+import Contacts from './Contacts'
 
 import { Container, ContainerBS } from './styles'
 
@@ -6,7 +7,7 @@ const Chat: React.FC = ({}) => {
   return (
     <Container>
       <ContainerBS id="chats">
-        <div className="contacts">chats</div>
+        <Contacts />
       </ContainerBS>
     </Container>
   )

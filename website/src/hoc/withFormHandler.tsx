@@ -14,10 +14,7 @@ export default function withFormHandler<T = any>(
   method: string,
   url: string
 ) {
-  return function WithFormHandler({
-    onSuccess,
-    onFailure,
-  }: WithFormHandlerProps) {
+  return function WithFormHandler({ onSuccess }: WithFormHandlerProps) {
     const [errors, setErrors] = useState<Errors>({})
     const [isLoading, setIsLoading] = useState(false)
     const onSubmit = async (payload: any) => {
@@ -34,13 +31,16 @@ export default function withFormHandler<T = any>(
         const body = await response.json()
         if (!response.ok) {
           const [key, value] = body.message.split(':')
-          setErrors({ [key]: value })
+          if (value !== undefined) {
+            setErrors({ [key]: value })
+          } else {
+            setErrors({ message: key })
+          }
           return
         }
         onSuccess && onSuccess(body)
       } catch (error: any) {
         if ('message' in error) setErrors({ message: error.message })
-        onFailure && onFailure(error)
       }
     }
     const config: any = {

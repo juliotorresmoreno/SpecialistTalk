@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { Button, Col, Form, Row } from 'react-bootstrap'
+import config from '../config'
+import withFormHandler from '../hoc/withFormHandler'
 
 type formData = {
   username: string
@@ -14,14 +16,19 @@ type RequiredFieldsOnly<T> = {
   [Property in keyof T]?: T[Property]
 }
 
-type SingUpFormProps = {
+type SignUpFormProps = {
+  isLoading?: boolean
   onSubmit: (payload: formData) => void
   errors: RequiredFieldsOnly<formData> & {
     message?: string
   }
 }
 
-const SingUpForm: React.FC<SingUpFormProps> = ({ onSubmit, errors }) => {
+const SignUpForm: React.FC<SignUpFormProps> = ({
+  onSubmit,
+  errors = {},
+  isLoading = false,
+}) => {
   const [username, setUsername] = useState('')
   const [name, setName] = useState('')
   const [lastname, setLastname] = useState('')
@@ -41,6 +48,7 @@ const SingUpForm: React.FC<SingUpFormProps> = ({ onSubmit, errors }) => {
       password_repeat,
     })
   }
+  if (isLoading) return <>Loading</>
   return (
     <Form onSubmit={defaultSubmit}>
       <Row>
@@ -51,6 +59,7 @@ const SingUpForm: React.FC<SingUpFormProps> = ({ onSubmit, errors }) => {
               type="text"
               placeholder="Name"
               value={name}
+              autoComplete="first-name"
               onChange={(e) => setName(e.target.value)}
             />
             {errors.name ? (
@@ -65,6 +74,7 @@ const SingUpForm: React.FC<SingUpFormProps> = ({ onSubmit, errors }) => {
               type="text"
               placeholder="Last Name"
               value={lastname}
+              autoComplete="last-name"
               onChange={(e) => setLastname(e.target.value)}
             />
             {errors.lastname ? (
@@ -81,6 +91,7 @@ const SingUpForm: React.FC<SingUpFormProps> = ({ onSubmit, errors }) => {
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          autoComplete="user-name"
         />
         {errors.username ? (
           <Form.Text className="text-muted">{errors.username}</Form.Text>
@@ -94,6 +105,7 @@ const SingUpForm: React.FC<SingUpFormProps> = ({ onSubmit, errors }) => {
           placeholder="Enter email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
         />
         {errors.email ? (
           <Form.Text className="text-muted">{errors.email}</Form.Text>
@@ -124,7 +136,7 @@ const SingUpForm: React.FC<SingUpFormProps> = ({ onSubmit, errors }) => {
               value={password_repeat}
               onChange={(e) => setPasswordRepeat(e.target.value)}
             />
-            {errors.password ? (
+            {errors.password_repeat ? (
               <Form.Text className="text-muted">
                 {errors.password_repeat}
               </Form.Text>
@@ -132,6 +144,14 @@ const SingUpForm: React.FC<SingUpFormProps> = ({ onSubmit, errors }) => {
           </Form.Group>
         </Col>
       </Row>
+
+      {errors.message ? (
+        <div>
+          <Form.Text className="text-danger">
+            <strong>{errors.message}</strong>
+          </Form.Text>
+        </div>
+      ) : null}
 
       <Form.Group className="mb-3" controlId="form-terms-agreed">
         <Form.Check
@@ -149,4 +169,6 @@ const SingUpForm: React.FC<SingUpFormProps> = ({ onSubmit, errors }) => {
   )
 }
 
-export default SingUpForm
+const url = config.baseUrl + '/auth/sing-up'
+
+export default withFormHandler<SignUpFormProps>(SignUpForm, 'POST', url)

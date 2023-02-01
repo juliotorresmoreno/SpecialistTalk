@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button, Form } from 'react-bootstrap'
+import { Link } from 'react-router-dom'
 import config from '../config'
 import withFormHandler from '../hoc/withFormHandler'
 import useFormValue from '../hooks/useFormValue'
@@ -13,7 +14,7 @@ type RequiredFieldsOnly<T> = {
   [Property in keyof T]?: T[Property]
 }
 
-type SingInFormProps = {
+type SignInFormProps = {
   isLoading?: boolean
   onSubmit: (payload: formData) => void
   errors: RequiredFieldsOnly<formData> & {
@@ -21,7 +22,7 @@ type SingInFormProps = {
   }
 }
 
-const SingInForm: React.FC<SingInFormProps> = ({
+const SignInForm: React.FC<SignInFormProps> = ({
   onSubmit,
   errors = {},
   isLoading = false,
@@ -39,16 +40,17 @@ const SingInForm: React.FC<SingInFormProps> = ({
       <Form.Group className="mb-3" controlId="form-email">
         <Form.Label>Email address</Form.Label>
         <Form.Control
+          name="email"
           type="email"
           placeholder="Enter email"
           value={email}
           onChange={setEmail}
+          autoComplete="email"
         />
         {errors.email ? (
           <Form.Text className="text-muted">{errors.email}</Form.Text>
         ) : null}
       </Form.Group>
-
       <Form.Group className="mb-3" controlId="form-password">
         <Form.Label>Password</Form.Label>
         <Form.Control
@@ -62,16 +64,22 @@ const SingInForm: React.FC<SingInFormProps> = ({
         ) : null}
       </Form.Group>
       {errors.message ? (
-        <Form.Text className="text-muted">{errors.message}</Form.Text>
+        <div>
+          <Form.Text className="text-danger">
+            <strong>{errors.message}</strong>
+          </Form.Text>
+        </div>
       ) : null}
-
       <Button variant="primary" type="submit">
+        <span className="material-symbols-outlined">login</span>
         Submit
       </Button>
+      &nbsp;&nbsp;&nbsp;
+      <Link to="/recovery-password">Recuperar cuenta</Link>
     </Form>
   )
 }
 
 const url = config.baseUrl + '/auth/sing-in'
 
-export default withFormHandler<SingInFormProps>(SingInForm, 'POST', url)
+export default withFormHandler<SignInFormProps>(SignInForm, 'POST', url)

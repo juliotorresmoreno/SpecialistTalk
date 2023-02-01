@@ -1,0 +1,4 @@
+#responsive-navbar-nav>div.nav-item.dropdown>.dropdown-menu {
+  margin-left: 100%;
+  transform: translateX(-100%);
+}

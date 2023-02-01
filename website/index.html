@@ -2,41 +2,44 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>WebSocket</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+    integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <title>WebSocket</title>
 </head>
 
 <body>
-    <p id="output"></p>
+  <p id="output"></p>
 
-    <script>
-        var loc = window.location;
-        var uri = 'ws:';
+  <script>
+    var loc = window.location;
+    var uri = 'ws:';
 
-        if (loc.protocol === 'https:') {
-            uri = 'wss:';
-        }
-        uri += '//' + loc.host;
-        uri += loc.pathname + 'ws';
-        uri += loc.search
-        console.log(uri)
+    if (loc.protocol === 'https:') {
+      uri = 'wss:';
+    }
+    uri += '//' + loc.host;
+    uri += loc.pathname + 'ws';
+    uri += loc.search
+    console.log(uri)
 
-        var ws = new WebSocket(uri)
+    var ws = new WebSocket(uri)
 
-        ws.onopen = function () {
-            console.log('Connected')
-        }
+    ws.onopen = function () {
+      console.log('Connected')
+    }
 
-        ws.onmessage = function (evt) {
-            var out = document.getElementById('output');
-            out.innerHTML += evt.data + '<br>';
-        }
+    ws.onmessage = function (evt) {
+      var out = document.getElementById('output');
+      out.innerHTML += evt.data + '<br>';
+    }
 
-        setInterval(function () {
-            if (ws.readyState == ws.OPEN)
-                ws.send('Hello, Server!');
-        }, 1000);
-    </script>
+    setInterval(function () {
+      if (ws.readyState == ws.OPEN)
+        ws.send('Hello, Server!');
+    }, 1000);
+  </script>
 </body>
 
 </html>

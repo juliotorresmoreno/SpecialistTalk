@@ -1,21 +1,16 @@
 import React from 'react'
-import { Button } from 'react-bootstrap'
 import ModalBS from 'react-bootstrap/Modal'
 
 type ModalProps = {
   show: boolean
-  title: string
+  title: React.ReactNode
   handleClose: () => void
-  handleSave: () => void
-  buttons?: React.ReactNode
 } & React.PropsWithChildren
 
 const Modal: React.FC<ModalProps> = ({
   show,
   title,
-  buttons,
   children,
-  handleSave,
   handleClose,
 }) => {
   return (
@@ -24,7 +19,6 @@ const Modal: React.FC<ModalProps> = ({
         <ModalBS.Title>{title}</ModalBS.Title>
       </ModalBS.Header>
       <ModalBS.Body>{children}</ModalBS.Body>
-      {buttons ? <ModalBS.Footer>buttons</ModalBS.Footer> : null}
     </ModalBS>
   )
 }
