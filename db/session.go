@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/go-xorm/xorm"
-	"github.com/juliotorresmoreno/freelive/model"
+	"github.com/juliotorresmoreno/SpecialistTalk/model"
 )
 
 type Session struct {

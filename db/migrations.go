@@ -3,8 +3,8 @@ package db
 import (
 	"log"
 
-	"github.com/juliotorresmoreno/freelive/configs"
-	"github.com/juliotorresmoreno/freelive/model"
+	"github.com/juliotorresmoreno/SpecialistTalk/configs"
+	"github.com/juliotorresmoreno/SpecialistTalk/model"
 )
 
 // Migrate s

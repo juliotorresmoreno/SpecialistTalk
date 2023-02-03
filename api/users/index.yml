@@ -1,0 +1,31 @@
+definitions:
+  User:
+    $ref: "../schemas/user.yml"
+
+put:
+  tags:
+    - users
+
+  produces:
+    - application/json
+
+  operationId: Put user
+  parameters:
+    - in: body
+      name: User
+      description: User in api.
+
+      schema:
+        $ref: "#/definitions/User"
+
+  responses:
+    200:
+      description: User modified
+      schema:
+        $ref: "#/definitions/User"
+    401:
+      $ref: "../common/error-401.yml"
+    403:
+      $ref: "../common/error-403.yml"
+    500:
+      $ref: "../common/error-500.yml"

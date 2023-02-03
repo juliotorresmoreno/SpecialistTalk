@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/juliotorresmoreno/freelive/configs"
-	"github.com/juliotorresmoreno/freelive/db"
-	"github.com/juliotorresmoreno/freelive/helper"
-	"github.com/juliotorresmoreno/freelive/model"
+	"github.com/juliotorresmoreno/SpecialistTalk/configs"
+	"github.com/juliotorresmoreno/SpecialistTalk/db"
+	"github.com/juliotorresmoreno/SpecialistTalk/helper"
+	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/labstack/echo/v4"
 )
 
@@ -104,7 +104,6 @@ func (that *UsersHandler) PATCH(c echo.Context) error {
 // AttachUsers s
 func AttachUsers(g *echo.Group) {
 	u := &UsersHandler{}
-	g.GET("/session", u.GET)
 	g.GET("/:user_id", u.GET)
 	g.PUT("", u.PUT)
 	g.PATCH("/:user_id", u.PATCH)

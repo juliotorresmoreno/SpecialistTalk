@@ -1,40 +1,33 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
-import { Link, useLocation } from 'react-router-dom'
-import classnames from 'classnames'
+import { Link } from 'react-router-dom'
 import useOnScreen from '../hooks/useOnScreen'
+import Modal from './Modal'
+import SingInForm from './SignInForm'
+import SingUpForm from './SignUpForm'
+import { Session } from '../models/session'
+import authSlice from '../features/auth'
+import { useAppDispatch } from '../store/hooks'
 
 type NavBarProps = {} & React.PropsWithChildren
 
 const NavBar: React.FC<NavBarProps> = (props) => {
   const toggleBtnRef = useRef<HTMLButtonElement | null>()
   const isVisible = useOnScreen(toggleBtnRef)
-  const location = useLocation()
-  const links0 = [
-    ['/forum', 'Foro'],
-    //['/recommends', 'Recomendado'],
-    ['/social', 'Social'],
-  ]
-  const links1 = [
-    ['/sign-in', 'Ingresar'],
-    ['/sign-up', 'Registrarse'],
-  ]
+  const [showModal, setShowModal] = useState<Link | null>(null)
+  const dispatch = useAppDispatch()
+
   const toggleNav = () => {
     if (isVisible) toggleBtnRef.current?.click()
   }
-  const renderLinks = ([link, title]: string[]) => {
-    const classNames = classnames({
-      'nav-link': true,
-      active: location.pathname === link,
-    })
-    return (
-      <Link key={link} className={classNames} to={link} onClick={toggleNav}>
-        {title}
-      </Link>
-    )
+
+  type Link = {
+    title: React.ReactNode
+    form: React.ReactNode
   }
+
   return (
     <Navbar collapseOnSelect expand="lg" bg="purple" variant="dark">
       <Container>
@@ -46,9 +39,77 @@ const NavBar: React.FC<NavBarProps> = (props) => {
           aria-controls="responsive-navbar-nav"
         />
         <Navbar.Collapse id="responsive-navbar-nav">
-          <Nav className="me-auto">{links0.map(renderLinks)}</Nav>
-          <Nav>{links1.map(renderLinks)}</Nav>
+          <Nav className="me-auto">
+            <Link to="/forum" className="nav-link" onClick={toggleNav}>
+              Foro
+            </Link>
+          </Nav>
+          <Nav>
+            <Link
+              to=""
+              className="nav-link"
+              onClick={() =>
+                setShowModal({
+                  title: (
+                    <>
+                      <span className="material-symbols-outlined">login</span>
+                      &nbsp;Sing In
+                    </>
+                  ),
+                  form: (
+                    <SingInForm
+                      onSuccess={(session: Session) => {
+                        setShowModal(null)
+                        dispatch(authSlice.actions.setSession(session))
+                      }}
+                    />
+                  ),
+                })
+              }
+            >
+              <span className="material-symbols-outlined">login</span>
+              &nbsp;Sign In
+            </Link>
+          </Nav>
+          <Nav>
+            <Link
+              to=""
+              className="nav-link"
+              onClick={() =>
+                setShowModal({
+                  title: (
+                    <>
+                      <span className="material-symbols-outlined">
+                        app_registration
+                      </span>
+                      &nbsp;Sign Up
+                    </>
+                  ),
+                  form: (
+                    <SingUpForm
+                      onSuccess={(session: Session) => {
+                        setShowModal(null)
+                        dispatch(authSlice.actions.setSession(session))
+                      }}
+                    />
+                  ),
+                })
+              }
+            >
+              <span className="material-symbols-outlined">
+                app_registration
+              </span>
+              &nbsp;Sign up
+            </Link>
+          </Nav>
         </Navbar.Collapse>
+        <Modal
+          show={showModal !== null}
+          title={showModal?.title ?? ''}
+          handleClose={() => setShowModal(null)}
+        >
+          {showModal?.form}
+        </Modal>
       </Container>
     </Navbar>
   )

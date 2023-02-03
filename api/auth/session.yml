@@ -1,0 +1,38 @@
+definitions:
+  User:
+    $ref: "../schemas/user.yml"
+
+securityDefinitions:
+  # X-API-Key: abcdef12345
+  APIKeyHeader:
+    type: apiKey
+    in: header
+    name: X-API-Key
+  # /path?api_key=abcdef12345
+  APIKeyQueryParam:
+    type: apiKey
+    in: query
+    name: token
+
+get:
+  tags:
+    - auth
+
+  produces:
+    - application/json
+
+  security:
+    - APIKeyQueryParam: []
+
+  operationId: Session user
+  responses:
+    200:
+      description: Session
+      schema:
+        $ref: "#/definitions/User"
+    401:
+      $ref: "../common/error-401.yml"
+    403:
+      $ref: "../common/error-403.yml"
+    500:
+      $ref: "../common/error-500.yml"

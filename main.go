@@ -1,12 +1,11 @@
 package main
 
 import (
-	"github.com/juliotorresmoreno/freelive/db"
-	"github.com/juliotorresmoreno/freelive/server"
+	"github.com/juliotorresmoreno/SpecialistTalk/db"
+	"github.com/juliotorresmoreno/SpecialistTalk/server"
 )
 
 func main() {
-
 	db.Migrate()
 
 	e := server.NewServer()

@@ -1,0 +1,30 @@
+type: object
+description: User
+required:
+  - email
+  - username
+  - name
+  - lastname
+properties:
+  id:
+    type: number
+  email:
+    type: string
+  username:
+    type: string
+  name:
+    type: string
+  lastname:
+    type: string
+  date_birth:
+    type: string
+  imgSrc:
+    type: string
+  country:
+    type: string
+  nationality:
+    type: string
+  facebook:
+    type: string
+  linkedin:
+    type: string

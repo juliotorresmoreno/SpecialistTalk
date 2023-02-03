@@ -1,13 +1,12 @@
 package server
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
-	"github.com/juliotorresmoreno/freelive/configs"
-	"github.com/juliotorresmoreno/freelive/handler"
-	middleware_app "github.com/juliotorresmoreno/freelive/middleware"
+	"github.com/juliotorresmoreno/SpecialistTalk/configs"
+	"github.com/juliotorresmoreno/SpecialistTalk/handler"
+	middleware_app "github.com/juliotorresmoreno/SpecialistTalk/middleware"
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -17,10 +16,9 @@ type ServerHTTP struct {
 	*echo.Echo
 }
 
-// Listen s
 func (s *ServerHTTP) Listen() error {
 	conf := configs.GetConfig()
-	host := fmt.Sprintf("%v:%v", conf.Host, conf.Port)
+	host := conf.Host + ":" + conf.Port
 	return s.Start(host)
 }
 
@@ -28,7 +26,12 @@ func NewServer() *ServerHTTP {
 	e := echo.New()
 	svr := &ServerHTTP{e}
 
-	e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Skipper: func(c echo.Context) bool {
+			path := c.Request().URL.Path
+			return len(path) >= 8 && path[:8] == "/api/v1/"
+		},
+	}))
 	e.Use(middleware.Recover())
 
 	p := prometheus.NewPrometheus("echo", nil)
@@ -49,7 +52,6 @@ func NewServer() *ServerHTTP {
 	e.Use(middleware.CORS())
 	// e.Use(middleware.CSRF())
 
-	e.Static("/", "website/dist")
 	handler.AttachWS(e.Group("/ws", middleware_app.Session))
 
 	handler.AttachSwaggerApi(e.Group("/docs"))
@@ -57,6 +59,8 @@ func NewServer() *ServerHTTP {
 	api := e.Group("/api/v1", middleware_app.Session)
 	handler.AttachAuth(api.Group("/auth"))
 	handler.AttachUsers(api.Group("/users"))
+
+	handler.AttachStatic(e.Group("/*"))
 
 	return svr
 }

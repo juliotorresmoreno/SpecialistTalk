@@ -1,5 +1,5 @@
 {
-  "name": "english",
+  "name": "SpecialistTalk",
   "version": "0.0.1",
   "description": "",
   "main": "index.ts",
@@ -54,6 +54,7 @@
     "react-router-dom": "^6.4.3",
     "reactstrap": "^9.1.5",
     "redux": "^4.2.0",
+    "redux-persist": "^6.0.0",
     "sass": "^1.56.1",
     "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",

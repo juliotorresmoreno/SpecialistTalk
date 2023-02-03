@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/go-redis/redis"
-	"github.com/juliotorresmoreno/freelive/configs"
+	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 )
 
 func NewRedis() *redis.Client {

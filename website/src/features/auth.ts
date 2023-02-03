@@ -1,14 +1,26 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { Session } from '../models/session'
+
+type AuthState = {
+  session: Session | null
+}
+
+const initialState: AuthState = {
+  session: null,
+}
 
 const authSlice = createSlice({
   name: 'auth',
-  initialState: [],
+  initialState,
   reducers: {
-    signIn(state, action) {},
+    setSession(state, action: PayloadAction<Session>) {
+      state.session = action.payload
+    },
+    logout(state, action: PayloadAction<void>) {
+      state.session = null
+    },
     signUp(state, action) {},
   },
 })
 
-export const actions = authSlice.actions
-const authReducer = authSlice.reducer
-export default authReducer
+export default authSlice

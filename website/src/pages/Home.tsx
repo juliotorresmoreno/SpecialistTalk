@@ -12,17 +12,11 @@ const HomePage: React.FC = () => {
       <main>
         <div
           style={{
-            display: 'grid',
-            gridTemplateRows: 'repeat(3, 100px)',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            display: 'flex',
+            flex: 1,
           }}
         >
-          <div
-            style={{
-              gridArea: '2 / 1 / 4 / 4',
-              background: 'red',
-            }}
-          ></div>
+          <div></div>
         </div>
       </main>
     </>
