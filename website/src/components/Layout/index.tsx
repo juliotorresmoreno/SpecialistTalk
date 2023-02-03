@@ -3,7 +3,7 @@ import NavBar from '../NavBar'
 import GuessNavBar from '../GuessNavBar'
 import Container from 'react-bootstrap/Container'
 import { useAppSelector } from '../../store/hooks'
-import Chat from '../Chat'
+import Social from '../Social'
 import Aside from '../Aside'
 
 type LayoutProps = {} & React.PropsWithChildren
@@ -16,7 +16,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {session ? (
         <>
           <GuessNavBar />
-          <Chat />
+          <Social />
         </>
       ) : (
         <NavBar />

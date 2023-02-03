@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/juliotorresmoreno/freelive/db"
-	"github.com/juliotorresmoreno/freelive/model"
-	"github.com/juliotorresmoreno/freelive/services"
+	"github.com/juliotorresmoreno/SpecialistTalk/db"
+	"github.com/juliotorresmoreno/SpecialistTalk/model"
+	"github.com/juliotorresmoreno/SpecialistTalk/services"
 	"github.com/labstack/echo/v4"
 )
 

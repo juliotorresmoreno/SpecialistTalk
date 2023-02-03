@@ -5,8 +5,8 @@ ADD . /app
 WORKDIR /app
 
 RUN go mod download
-RUN go build -o /freelive
+RUN go build -o /SpecialistTalk
 
 EXPOSE 4080
 
-ENTRYPOINT [ "/freelive" ]
+ENTRYPOINT [ "/SpecialistTalk" ]

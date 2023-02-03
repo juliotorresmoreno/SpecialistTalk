@@ -1,4 +1,4 @@
-module github.com/juliotorresmoreno/freelive
+module github.com/juliotorresmoreno/SpecialistTalk
 
 go 1.19
 

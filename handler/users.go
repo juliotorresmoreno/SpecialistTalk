@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/juliotorresmoreno/freelive/configs"
-	"github.com/juliotorresmoreno/freelive/db"
-	"github.com/juliotorresmoreno/freelive/helper"
-	"github.com/juliotorresmoreno/freelive/model"
+	"github.com/juliotorresmoreno/SpecialistTalk/configs"
+	"github.com/juliotorresmoreno/SpecialistTalk/db"
+	"github.com/juliotorresmoreno/SpecialistTalk/helper"
+	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/labstack/echo/v4"
 )
 

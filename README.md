@@ -1,4 +1,4 @@
-# freelive
+# SpecialistTalk
 
 This project goals are practice with this language and i to have something in my personal portfolio.
 Thanks so much for don't exciting u so much
@@ -8,7 +8,7 @@ Thanks so much for don't exciting u so much
 you should clone the repository, below is an example of how to do it
 
 ```bash
-git clone https://github.com/juliotorresmoreno/freelive.git
+git clone https://github.com/juliotorresmoreno/SpecialistTalk.git
 ```
 
 we create or edit the .env file and make sure it has the following content, then the trello documentation to get the key and token parameters.

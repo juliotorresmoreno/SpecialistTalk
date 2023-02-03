@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"github.com/globalsign/mgo/bson"
-	"github.com/juliotorresmoreno/freelive/configs"
-	"github.com/juliotorresmoreno/freelive/model"
-	"github.com/juliotorresmoreno/freelive/services"
+	"github.com/juliotorresmoreno/SpecialistTalk/configs"
+	"github.com/juliotorresmoreno/SpecialistTalk/model"
+	"github.com/juliotorresmoreno/SpecialistTalk/services"
 	"github.com/labstack/echo/v4"
 )
 

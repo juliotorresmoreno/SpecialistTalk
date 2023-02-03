@@ -4,14 +4,7 @@ import {
   FormControl as _FormControlBS,
 } from 'react-bootstrap'
 
-export const Container = styled.div`
-  position: fixed;
-  margin-top: 100vh;
-  transform: translateY(-100%);
-  width: 100%;
-  # translateX(-100%);
-  # margin-left: calc(100% - 50px);
-`
+export const Container = styled.div``
 
 export const ContainerBS = styled(_ContainerBS)`
   display: flex;
@@ -28,14 +21,12 @@ export const Label = styled.div`
   cursor: pointer;
 `
 export const Floating = styled.div`
-  #padding: var(--spacing-v1);
   width: 200px;
   position: absolute;
   height: calc(100vh - 200px);
   transform: translateY(-100%);
   background-color: white;
   border-color: #ccc;
-  marging: -10px;
   background-color: red;
 `
 export const FormControl = styled(_FormControlBS)`
@@ -49,4 +40,27 @@ export const FormControl = styled(_FormControlBS)`
     box-shadow: none;
     text-decoration: none;
   }
+`
+
+export const ContactContainer = styled.div`
+  padding: var(--spacing-v1);
+`
+
+export const Contact = styled.div`
+  height: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
+`
+
+export const ChatContainer = styled.div`
+  width: 100px;
+  display: inline-block;
+
+  line-height: calc(var(--spacing-v1) * 3);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
 `

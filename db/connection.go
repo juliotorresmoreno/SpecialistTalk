@@ -2,8 +2,8 @@ package db
 
 import (
 	"github.com/go-xorm/xorm"
-	"github.com/juliotorresmoreno/freelive/configs"
-	"github.com/juliotorresmoreno/freelive/model"
+	"github.com/juliotorresmoreno/SpecialistTalk/configs"
+	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/lib/pq"
 )
 

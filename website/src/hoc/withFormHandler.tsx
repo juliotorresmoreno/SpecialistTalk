@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
+import { Session } from '../models/session'
 
 type Errors = {
   [x: string]: string
 } & { message?: string }
 
 type WithFormHandlerProps = {
-  onSuccess?: (payload: any) => void
+  onSuccess?: (payload: Session) => void
   onFailure?: (errors: Errors) => void
 }
 
@@ -38,7 +39,7 @@ export default function withFormHandler<T = any>(
           }
           return
         }
-        onSuccess && onSuccess(body)
+        onSuccess && onSuccess(new Session(body))
       } catch (error: any) {
         if ('message' in error) setErrors({ message: error.message })
       }

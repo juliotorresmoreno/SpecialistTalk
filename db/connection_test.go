@@ -3,7 +3,7 @@ package db
 import (
 	"testing"
 
-	"github.com/juliotorresmoreno/freelive/configs"
+	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 	"github.com/stretchr/testify/require"
 )
 

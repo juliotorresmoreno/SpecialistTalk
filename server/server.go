@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/juliotorresmoreno/freelive/configs"
-	"github.com/juliotorresmoreno/freelive/handler"
-	middleware_app "github.com/juliotorresmoreno/freelive/middleware"
+	"github.com/juliotorresmoreno/SpecialistTalk/configs"
+	"github.com/juliotorresmoreno/SpecialistTalk/handler"
+	middleware_app "github.com/juliotorresmoreno/SpecialistTalk/middleware"
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
