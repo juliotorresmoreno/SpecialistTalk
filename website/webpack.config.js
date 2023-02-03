@@ -64,7 +64,7 @@ const configuration = {
   cache: false,
   devServer: {
     compress: true,
-    port: 9000,
+    port: 19000,
     host: '127.0.0.1',
     static: path.resolve(__dirname, './public'),
   },

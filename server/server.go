@@ -1,7 +1,6 @@
 package server
 
 import (
-	"os"
 	"strings"
 	"time"
 
@@ -27,9 +26,12 @@ func NewServer() *ServerHTTP {
 	e := echo.New()
 	svr := &ServerHTTP{e}
 
-	conf := configs.GetConfig()
-
-	e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Skipper: func(c echo.Context) bool {
+			path := c.Request().URL.Path
+			return len(path) >= 8 && path[:8] == "/api/v1/"
+		},
+	}))
 	e.Use(middleware.Recover())
 
 	p := prometheus.NewPrometheus("echo", nil)
@@ -58,17 +60,7 @@ func NewServer() *ServerHTTP {
 	handler.AttachAuth(api.Group("/auth"))
 	handler.AttachUsers(api.Group("/users"))
 
-	static := e.Group("/*")
-	if conf.Env == "development" {
-		static.Use(middleware_app.NoCache)
-	}
-	static.GET("", func(c echo.Context) error {
-		_, err := os.Lstat("website/dist/" + c.Request().URL.Path)
-		if err != nil {
-			return c.File("website/dist/index.html")
-		}
-		return c.File("website/dist/" + c.Request().URL.Path)
-	})
+	handler.AttachStatic(e.Group("/*"))
 
 	return svr
 }

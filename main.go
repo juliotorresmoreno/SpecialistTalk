@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-
 	db.Migrate()
 
 	e := server.NewServer()
