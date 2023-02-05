@@ -14,7 +14,29 @@ import (
 type UsersHandler struct {
 }
 
-func (that *UsersHandler) GET(c echo.Context) error {
+func (that *UsersHandler) findUsers(c echo.Context) error {
+	_session := c.Get("session")
+	if _session == nil {
+		return echo.NewHTTPError(401, "Unauthorized")
+	}
+	session := _session.(*model.User)
+
+	conn, err := db.GetConnectionPool()
+	if err != nil {
+		return err
+	}
+
+	users := make([]model.User, 0)
+	err = conn.
+		Where("id <> ?", session.ID).
+		Find(&users)
+	if err != nil {
+		return echo.NewHTTPError(501, helper.ParseError(err).Error())
+	}
+	return c.JSON(200, users)
+}
+
+func (that *UsersHandler) findUser(c echo.Context) error {
 	_session := c.Get("session")
 	if _session == nil {
 		return echo.NewHTTPError(401, "Unauthorized")
@@ -37,7 +59,7 @@ func (that *UsersHandler) GET(c echo.Context) error {
 	return c.JSON(200, u)
 }
 
-func (that *UsersHandler) PUT(c echo.Context) error {
+func (that *UsersHandler) addUser(c echo.Context) error {
 	u := &model.User{}
 	if err := c.Bind(u); err != nil {
 		return echo.NewHTTPError(406, helper.ParseError(err).Error())
@@ -56,7 +78,7 @@ func (that *UsersHandler) PUT(c echo.Context) error {
 	return c.JSON(202, u)
 }
 
-func (that *UsersHandler) PATCH(c echo.Context) error {
+func (that *UsersHandler) updateUser(c echo.Context) error {
 	_session := c.Get("session")
 	if _session == nil {
 		return echo.NewHTTPError(401, "Unauthorized")
@@ -104,7 +126,8 @@ func (that *UsersHandler) PATCH(c echo.Context) error {
 // AttachUsers s
 func AttachUsers(g *echo.Group) {
 	u := &UsersHandler{}
-	g.GET("/:user_id", u.GET)
-	g.PUT("", u.PUT)
-	g.PATCH("/:user_id", u.PATCH)
+	g.GET("", u.findUsers)
+	g.GET("/:user_id", u.findUser)
+	g.PUT("", u.addUser)
+	g.PATCH("/:user_id", u.updateUser)
 }
