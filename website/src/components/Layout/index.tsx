@@ -1,15 +1,18 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import NavBar from '../NavBar'
 import GuessNavBar from '../GuessNavBar'
 import Container from 'react-bootstrap/Container'
 import { useAppSelector } from '../../store/hooks'
 import Social from '../Social'
 import Aside from '../Aside'
+import { Messages } from '../Social/Messages'
+import SocialContext from '../../contexts/SocialContext'
 
 type LayoutProps = {} & React.PropsWithChildren
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const session = useAppSelector((state) => state.auth.session)
+  const { activeChat } = useContext(SocialContext)
 
   return (
     <>
@@ -24,7 +27,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       <Container id="container">
         <div className="content">
-          <div>{children}</div>
+          {activeChat ? <Messages /> : <div>{children}</div>}
           <Aside />
         </div>
       </Container>
