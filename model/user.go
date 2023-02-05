@@ -83,15 +83,12 @@ type user struct {
 	Name     string `json:"name"`
 	LastName string `json:"lastname"`
 
-	DocumentType string    `json:"document_type"`
-	Expedite     time.Time `json:"expedite"`
-	Document     string    `json:"document"`
-	DateBirth    time.Time `json:"date_birth"`
-	ImgSrc       string    `json:"imgSrc"`
-	Country      string    `json:"country"`
-	Nationality  string    `json:"nationality"`
-	Facebook     string    `json:"facebook"`
-	Linkedin     string    `json:"linkedin"`
+	DateBirth   time.Time `json:"date_birth"`
+	ImgSrc      string    `json:"imgSrc"`
+	Country     string    `json:"country"`
+	Nationality string    `json:"nationality"`
+	Facebook    string    `json:"facebook"`
+	Linkedin    string    `json:"linkedin"`
 
 	Password string `json:"password"`
 }

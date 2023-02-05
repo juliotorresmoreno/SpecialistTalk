@@ -1,8 +1,8 @@
 package db
 
 import (
-	"github.com/go-xorm/xorm"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
+	"xorm.io/xorm"
 )
 
 type Engine struct {

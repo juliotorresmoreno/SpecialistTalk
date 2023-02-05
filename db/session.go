@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-xorm/xorm"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
+	"xorm.io/xorm"
 )
 
 type Session struct {

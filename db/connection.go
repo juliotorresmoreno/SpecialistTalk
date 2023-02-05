@@ -1,10 +1,10 @@
 package db
 
 import (
-	"github.com/go-xorm/xorm"
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/lib/pq"
+	"xorm.io/xorm"
 )
 
 func NewEngigne(conf *configs.Database) (*xorm.Engine, error) {
