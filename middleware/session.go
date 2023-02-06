@@ -19,8 +19,7 @@ func Session(handler echo.HandlerFunc) echo.HandlerFunc {
 		if token == "" {
 			return handler(c)
 		}
-		redisCli := services.NewRedis()
-		go redisCli.Close()
+		redisCli := services.GetPoolRedis()
 		r := redisCli.Get(token).Val()
 		if r != "" {
 			conn, err := db.GetConnectionPool()

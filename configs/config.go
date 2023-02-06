@@ -23,6 +23,7 @@ type Redis struct {
 	Addr     string `json:"addr"     yaml:"addr"`
 	Password string `json:"password" yaml:"password"`
 	DB       int    `json:"db"       yaml:"db"`
+	PoolSize int    `json:"poolSize" yaml:"poolSize"`
 }
 
 // Config s
@@ -107,6 +108,7 @@ func init() {
 	conf.Redis.Addr = fromEnvfString(conf.Redis.Addr, "REDIS_ADDR", "localhost:6379")
 	conf.Redis.DB = fromEnvfInt(conf.Redis.DB, "REDIS_DB", 0)
 	conf.Redis.Password = fromEnvfString(conf.Redis.Password, "REDIS_PWD", "")
+	conf.Redis.PoolSize = fromEnvfInt(conf.Redis.PoolSize, "POOL_SIZE", 50)
 
 	conf.Database.DSN = fromEnvfString(conf.Database.DSN, "DATABASE_DSN", "")
 	conf.Database.Driver = fromEnvfString(conf.Database.Driver, "DATABASE_DRIVER", "")
