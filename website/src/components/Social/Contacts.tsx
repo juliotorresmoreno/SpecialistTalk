@@ -3,7 +3,8 @@ import styled from 'styled-components'
 import useToggle from '../../hooks/useToggle'
 import { User } from '../../models/user'
 import Context from '../../contexts/SocialContext'
-import { useLocation, useNavigate, useNavigation } from 'react-router'
+import { useNavigate } from 'react-router'
+import useSearch from '../../hooks/useSearch'
 
 const Container = styled.div`
   display: flex;
@@ -87,8 +88,10 @@ const contacts = [
 ]
 
 export const Contacts = () => {
+  const url = '/users'
   const [isOpen, toggle] = useToggle(true)
-  const { setActiveChat, activeChat } = useContext(Context)
+  const { setActiveChat } = useContext(Context)
+  const [search, setSearch, result] = useSearch(url)
 
   const onToggle = () => {
     if (isOpen) setActiveChat(null)
@@ -96,13 +99,15 @@ export const Contacts = () => {
   }
   const navigate = useNavigate()
 
+  const users = result.length > 0 ? result : contacts
+
   return (
     <Container>
       {isOpen ? (
         <Floating>
-          <InputSearch type="text" />
+          <InputSearch type="text" value={search} onChange={setSearch} />
           <ContactsContainer>
-            {contacts.map((contact) => (
+            {users.map((contact) => (
               <Contact
                 key={contact.id}
                 onClick={() => navigate('/chats/' + contact.id)}

@@ -50,7 +50,7 @@ func NewACL(user string, group string) (*ACL, error) {
 
 // User s
 type User struct {
-	ID            int       `xorm:"id integer not null autoincr pk"           valid:""`
+	ID            int       `xorm:"id BIGSERIAL not null autoincr pk"           valid:""`
 	Username      string    `xorm:"username varchar(20) not null unique"      valid:"username,required"`
 	Email         string    `xorm:"email varchar(200) not null unique"        valid:"email,required"`
 	Name          string    `xorm:"name varchar(50) not null"                 valid:"name,required"`

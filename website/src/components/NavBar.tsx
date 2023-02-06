@@ -7,7 +7,7 @@ import useOnScreen from '../hooks/useOnScreen'
 import Modal from './Modal'
 import SingInForm from './SignInForm'
 import SingUpForm from './SignUpForm'
-import { Session } from '../models/session'
+import { ISession } from '../models/session'
 import authSlice from '../features/auth'
 import { useAppDispatch } from '../store/hooks'
 
@@ -58,7 +58,7 @@ const NavBar: React.FC<NavBarProps> = (props) => {
                   ),
                   form: (
                     <SingInForm
-                      onSuccess={(session: Session) => {
+                      onSuccess={(session: ISession) => {
                         setShowModal(null)
                         dispatch(authSlice.actions.setSession(session))
                       }}
@@ -87,7 +87,7 @@ const NavBar: React.FC<NavBarProps> = (props) => {
                   ),
                   form: (
                     <SingUpForm
-                      onSuccess={(session: Session) => {
+                      onSuccess={(session: ISession) => {
                         setShowModal(null)
                         dispatch(authSlice.actions.setSession(session))
                       }}

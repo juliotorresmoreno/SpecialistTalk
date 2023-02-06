@@ -94,9 +94,8 @@ type Session struct {
 
 func MakeSession(c echo.Context, u *model.User) error {
 	token := bson.NewObjectId().Hex()
-	redisCli := services.NewRedis()
+	redisCli := services.GetPoolRedis()
 	redisCli.Set(token, u.ID, 24*time.Hour)
-	go redisCli.Close()
 
 	session := &Session{
 		Token: token,

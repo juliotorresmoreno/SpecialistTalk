@@ -23,4 +23,9 @@ func Migrate() {
 
 	_, _ = conn.Query("CREATE INDEX \"IDX_users_name\" ON public.users USING GIN (name);")
 	_, _ = conn.Query("CREATE INDEX \"IDX_users_lastname\" ON public.users USING GIN (lastname);")
+
+	err = conn.Sync2(model.Chat{})
+	if err != nil {
+		log.Fatal(err)
+	}
 }
