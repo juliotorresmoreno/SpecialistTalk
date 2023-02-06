@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Session } from '../models/session'
+import { ISession } from '../models/session'
 
-type AuthState = {
-  session: Session | null
+export type AuthState = {
+  session: ISession | null
 }
 
 const initialState: AuthState = {
@@ -13,13 +13,12 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setSession(state, action: PayloadAction<Session>) {
+    setSession(state, action: PayloadAction<ISession>) {
       state.session = action.payload
     },
-    logout(state, action: PayloadAction<void>) {
+    logout(state) {
       state.session = null
     },
-    signUp(state, action) {},
   },
 })
 

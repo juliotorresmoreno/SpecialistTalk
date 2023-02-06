@@ -39,7 +39,7 @@ export default function withFormHandler<T = any>(
           }
           return
         }
-        onSuccess && onSuccess(new Session(body))
+        onSuccess && onSuccess(body)
       } catch (error: any) {
         if ('message' in error) setErrors({ message: error.message })
       }
