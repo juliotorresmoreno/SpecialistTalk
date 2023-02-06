@@ -9,6 +9,7 @@ import (
 	"github.com/juliotorresmoreno/SpecialistTalk/helper"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/labstack/echo/v4"
+	"xorm.io/builder"
 )
 
 type UsersHandler struct {
@@ -27,8 +28,18 @@ func (that *UsersHandler) findUsers(c echo.Context) error {
 	}
 
 	users := make([]model.User, 0)
+
+	limit, skip := helper.Paginate(c)
+	q := c.QueryParam("q")
+	if q == "" {
+		return c.JSON(200, users)
+	}
+
+	query := builder.Like{"name", q}.Or(builder.Like{"lastname", q})
 	err = conn.
 		Where("id <> ?", session.ID).
+		And(query).
+		Limit(limit, skip).
 		Find(&users)
 	if err != nil {
 		return echo.NewHTTPError(501, helper.ParseError(err).Error())

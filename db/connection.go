@@ -1,6 +1,8 @@
 package db
 
 import (
+	"fmt"
+
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/lib/pq"
@@ -21,12 +23,16 @@ func NewEngigne(conf *configs.Database) (*xorm.Engine, error) {
 	return conn, err
 }
 
-var connectionPool *xorm.Engine
+var connectionPool *Engine
 
-func GetConnectionPool() (*xorm.Engine, error) {
+func GetConnectionPool() (*Engine, error) {
 	var err error
 	if connectionPool == nil {
-		connectionPool, err = NewEngigne(configs.GetConfig().Database)
+		conn, err := NewEngigne(configs.GetConfig().Database)
+		if err != nil {
+			return connectionPool, err
+		}
+		connectionPool = &Engine{Engine: conn}
 	}
 	return connectionPool, err
 }
@@ -34,10 +40,18 @@ func GetConnectionPool() (*xorm.Engine, error) {
 func GetConnectionPoolWithSession(conf *configs.Database, user *model.User) (*Engine, error) {
 	conn, err := GetConnectionPool()
 
-	r := "(acl->>'owner' = '%v' or (acl->'groups'->'%v'->>'read')::boolean is true)"
-	w := "(acl->>'owner' = '%v' or (acl->'groups'->'%v'->>'write')::boolean is true)"
+	r := fmt.Sprintf(
+		"(acl->>'owner' = '%v' or (acl->'groups'->'%v'->>'read')::boolean is true)",
+		user.Username,
+		user.ACL.Group,
+	)
+	w := fmt.Sprintf(
+		"(acl->>'owner' = '%v' or (acl->'groups'->'%v'->>'write')::boolean is true)",
+		user.Username,
+		user.ACL.Group,
+	)
 
-	engine := &Engine{Engine: conn}
+	engine := &Engine{Engine: conn.Engine}
 	engine.permisionQueryRead = r
 	engine.permisionQueryWrite = w
 	engine.user = user

@@ -162,12 +162,11 @@ func (that *User) UnmarshalJSON(b []byte) error {
 // MarshalJSON s
 func (u *User) MarshalJSON() ([]byte, error) {
 	return json.Marshal(userWithowPassword{
-		ID:       u.ID,
-		Email:    u.Email,
-		Username: u.Username,
-		Name:     u.Name,
-		LastName: u.LastName,
-
+		ID:          u.ID,
+		Email:       u.Email,
+		Username:    u.Username,
+		Name:        u.Name,
+		LastName:    u.LastName,
 		DateBirth:   u.DateBirth,
 		ImgSrc:      u.ImgSrc,
 		Country:     u.Country,

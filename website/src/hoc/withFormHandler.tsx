@@ -33,7 +33,7 @@ export default function withFormHandler<T = any>(
         if (!response.ok) {
           const [key, value] = body.message.split(':')
           if (value !== undefined) {
-            setErrors({ [key]: value })
+            setErrors({ [key.toLowerCase()]: value })
           } else {
             setErrors({ message: key })
           }

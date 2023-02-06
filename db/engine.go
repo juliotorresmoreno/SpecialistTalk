@@ -9,6 +9,8 @@ type Engine struct {
 	permisionQueryRead  string
 	permisionQueryWrite string
 	user                *model.User
+	limit               int
+	skip                int
 	*xorm.Engine
 }
 
@@ -45,6 +47,8 @@ func (e *Engine) NewSession() *Session {
 		user:                e.user,
 		permisionQueryRead:  e.permisionQueryRead,
 		permisionQueryWrite: e.permisionQueryWrite,
+		limit:               e.limit,
+		skip:                e.skip,
 		Session:             e.Engine.NewSession(),
 	}
 }
