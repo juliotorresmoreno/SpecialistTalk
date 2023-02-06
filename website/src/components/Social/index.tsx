@@ -1,42 +1,59 @@
 import React from 'react'
-import { User } from '../../models/user'
-import Contacts from './Contacts'
-import Context from './context'
-import { Container, ContainerBS } from './styles'
-import Chat from './Chat'
+import styled from 'styled-components'
+import { Contacts } from './Contacts'
+import Provider from './Provider'
 
-const Social: React.FC = ({}) => {
-  const [activeChat, setActiveChat] = React.useState<User | null>(null)
-  const [chats, setChats] = React.useState<User[]>([
-    new User({
-      id: 22,
-      name: 'julio cesar j. r.',
-      lastname: 'torres moreno',
-      email: 'sssssss@asdas.com',
-      username: 'username',
-    }),
-  ])
-  function toggleChats(chat: User) {
-    if (!chats.find((el) => el.id === chat.id)) {
-      setChats([...chats, chat])
-      return
-    }
+const height = '35px'
+const width = '200px'
 
-    const nchats = chats.filter((el) => el.id != chat.id)
-    setChats(nchats)
+const Container = styled.div`
+  display: flex;
+  position: fixed;
+  height: ${height};
+  line-height: ${height};
+  user-select: none;
+  background-color: var(--bs-orange);
+
+  transform: translateY(calc(100vh - ${height}))
+    translateX(calc((100vw - 540px) / 2));
+  width: 540px;
+
+  @media (max-height: 400px) {
+    display: none;
   }
 
+  @media (min-width: 768px) {
+    transform: translateY(calc(100vh - ${height}))
+      translateX(calc((100vw - 720px) / 2 + 520px));
+    width: ${width};
+  }
+
+  @media (min-width: 992px) {
+    transform: translateY(calc(100vh - ${height}))
+      translateX(calc((100vw - 960px) / 2 + 760px));
+    width: ${width};
+  }
+
+  @media (min-width: 1200px) {
+    transform: translateY(calc(100vh - ${height}))
+      translateX(calc((100vw - 1140px) / 2 + 940px));
+    width: ${width};
+  }
+
+  @media (min-width: 1400px) {
+    transform: translateY(calc(100vh - ${height}))
+      translateX(calc((100vw - 1320px) / 2 + 1120px));
+    width: ${width};
+  }
+`
+
+const Social: React.FC = ({}) => {
   return (
-    <Context.Provider value={{ chats, toggleChats, activeChat, setActiveChat }}>
-      <Container className="social">
-        <ContainerBS id="chats">
-          <Contacts />
-          {chats.map((chat) => (
-            <Chat key={chat.id} user={chat} />
-          ))}
-        </ContainerBS>
+    <Provider>
+      <Container>
+        <Contacts />
       </Container>
-    </Context.Provider>
+    </Provider>
   )
 }
 

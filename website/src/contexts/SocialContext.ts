@@ -1,20 +1,20 @@
 import React from 'react'
-import { User } from '../../models/user'
+import { User } from '../models/user'
 
-type DefaultContext = {
+type DefaultSocialContext = {
   chats: User[]
   toggleChats: (chat: User) => void
   activeChat: User | null
   setActiveChat: (chat: User | null) => void
 }
 
-const defaultContext: DefaultContext = {
+const defaultSocialContext: DefaultSocialContext = {
   chats: [],
   toggleChats: () => {},
   activeChat: null,
   setActiveChat: () => {},
 }
 
-const Context = React.createContext<DefaultContext>(defaultContext)
+const SocialContext = React.createContext(defaultSocialContext)
 
-export default Context
+export default SocialContext

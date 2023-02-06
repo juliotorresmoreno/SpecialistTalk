@@ -1,26 +1,27 @@
 package db
 
 import (
-	"fmt"
 	"reflect"
 
-	"github.com/go-xorm/xorm"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
+	"xorm.io/xorm"
 )
 
 type Session struct {
 	permisionQueryRead  string
 	permisionQueryWrite string
+	limit               int
+	skip                int
 	user                *model.User
 	*xorm.Session
 }
 
 func (e *Session) getPermisionQueryRead() string {
-	return fmt.Sprintf(e.permisionQueryRead, e.user.Username, e.user.ACL.Group)
+	return e.permisionQueryRead
 }
 
 func (e *Session) getPermisionQueryWrite() string {
-	return fmt.Sprintf(e.permisionQueryWrite, e.user.Username, e.user.ACL.Group)
+	return e.permisionQueryWrite
 }
 
 func (e *Session) Get(bean interface{}) (bool, error) {
@@ -117,6 +118,9 @@ func (e Session) Select(str string) *Session {
 
 func (e Session) Where(query interface{}, args ...interface{}) *Session {
 	e.Session = e.Session.Where(query, args...)
+	if e.limit > 0 {
+		e.Limit(e.limit, e.skip)
+	}
 	return &e
 }
 

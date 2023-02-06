@@ -30,30 +30,10 @@ aside {
   width: 200px;
 }
 
-#chats {
-  display: flex;
-  flex-direction: row-reverse;
-  padding: 0;
-  background-color: cadetblue;
-}
-
-#chats .contacts {
-  width: 200px;
-  background-color: bisque;
-  line-height: 1rem;
-  cursor: pointer;
-}
-
 .only-small {
   // display: none;
 }
 
 .material-symbols-outlined {
   vertical-align: middle;
-}
-
-@media screen and (max-height: 600px) {
-  #chats {
-    display: none;
-  }
 }

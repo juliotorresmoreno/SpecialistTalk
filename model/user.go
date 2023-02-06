@@ -83,15 +83,12 @@ type user struct {
 	Name     string `json:"name"`
 	LastName string `json:"lastname"`
 
-	DocumentType string    `json:"document_type"`
-	Expedite     time.Time `json:"expedite"`
-	Document     string    `json:"document"`
-	DateBirth    time.Time `json:"date_birth"`
-	ImgSrc       string    `json:"imgSrc"`
-	Country      string    `json:"country"`
-	Nationality  string    `json:"nationality"`
-	Facebook     string    `json:"facebook"`
-	Linkedin     string    `json:"linkedin"`
+	DateBirth   time.Time `json:"date_birth"`
+	ImgSrc      string    `json:"imgSrc"`
+	Country     string    `json:"country"`
+	Nationality string    `json:"nationality"`
+	Facebook    string    `json:"facebook"`
+	Linkedin    string    `json:"linkedin"`
 
 	Password string `json:"password"`
 }
@@ -165,12 +162,11 @@ func (that *User) UnmarshalJSON(b []byte) error {
 // MarshalJSON s
 func (u *User) MarshalJSON() ([]byte, error) {
 	return json.Marshal(userWithowPassword{
-		ID:       u.ID,
-		Email:    u.Email,
-		Username: u.Username,
-		Name:     u.Name,
-		LastName: u.LastName,
-
+		ID:          u.ID,
+		Email:       u.Email,
+		Username:    u.Username,
+		Name:        u.Name,
+		LastName:    u.LastName,
 		DateBirth:   u.DateBirth,
 		ImgSrc:      u.ImgSrc,
 		Country:     u.Country,

@@ -57,6 +57,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             <Form.Label>Name</Form.Label>
             <Form.Control
               type="text"
+              name="name"
               placeholder="Name"
               value={name}
               autoComplete="first-name"
@@ -72,6 +73,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             <Form.Label>Last Name</Form.Label>
             <Form.Control
               type="text"
+              name="lastname"
               placeholder="Last Name"
               value={lastname}
               autoComplete="last-name"
@@ -88,10 +90,10 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
         <Form.Label>Username</Form.Label>
         <Form.Control
           type="text"
+          name="username"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          autoComplete="user-name"
         />
         {errors.username ? (
           <Form.Text className="text-muted">{errors.username}</Form.Text>
@@ -102,6 +104,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
         <Form.Label>Email address</Form.Label>
         <Form.Control
           type="email"
+          name="email"
           placeholder="Enter email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -117,6 +120,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
           <Form.Group className="mb-3" controlId="form-password">
             <Form.Label>Password</Form.Label>
             <Form.Control
+              name="password"
               type="password"
               placeholder="Password"
               value={password}
@@ -162,7 +166,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
         />
       </Form.Group>
 
-      <Button variant="primary" type="submit">
+      <Button disabled={!terms_agreed} variant="primary" type="submit">
         Submit
       </Button>
     </Form>
