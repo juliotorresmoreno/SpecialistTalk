@@ -12,6 +12,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type MongoDB struct {
+	DSN          string `json:"dsn"          yaml:"dsn"`
+	MaxOpenConns int    `json:"maxOpenConns" yaml:"maxOpenConns"`
+	MaxIdleConns int    `json:"maxIdleConns" yaml:"maxIdleConns"`
+}
+
 type Database struct {
 	Driver       string `json:"driver"       yaml:"driver"`
 	DSN          string `json:"dsn"          yaml:"dsn"`

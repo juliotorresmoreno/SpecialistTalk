@@ -1,7 +1,8 @@
 import React from 'react'
 import Header from '../components/Header'
+import withChat from '../hoc/withChat'
 
-const MessagesPage: React.FC = () => {
+const _MessagesPage: React.FC = () => {
   const header = {
     title: 'Messages',
     description: 'programa de super poderes',
@@ -13,5 +14,7 @@ const MessagesPage: React.FC = () => {
     </>
   )
 }
+
+const MessagesPage = withChat(_MessagesPage)
 
 export default MessagesPage

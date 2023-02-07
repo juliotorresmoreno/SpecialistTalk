@@ -3,6 +3,7 @@ package helper
 import (
 	"strconv"
 
+	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,4 +18,12 @@ func Paginate(c echo.Context) (int, int) {
 	}
 
 	return limit, skip
+}
+
+func ValidateSession(c echo.Context) (*model.User, error) {
+	session := c.Get("session")
+	if session == nil {
+		return nil, echo.NewHTTPError(401, "Unauthorized")
+	}
+	return session.(*model.User), nil
 }

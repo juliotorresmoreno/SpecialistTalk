@@ -10,16 +10,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Group struct {
-	Read  bool `json:"read"`
-	Write bool `json:"write"`
-}
-
 // ACL s
 type ACL struct {
-	Owner  string           `json:"owner"`
-	Group  string           `json:"group"`
-	Groups map[string]Group `json:"groups"`
+	Owner string `json:"owner"`
+	Group string `json:"group"`
 }
 
 func (that ACL) IsAdmin() bool {
