@@ -6,7 +6,7 @@
   "scripts": {
     "start": "webpack-dev-server --history-api-fallback",
     "dev": "webpack-dev-server --history-api-fallback",
-    "serve:dev": "webpack --mode 'development' --watch",
+    "serve:dev": "npx webpack --mode development --watch",
     "build": "webpack",
     "lint": "standard",
     "lint:fix": "standard --fix",

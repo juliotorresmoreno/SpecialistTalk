@@ -59,6 +59,7 @@ func NewServer() *ServerHTTP {
 	api := e.Group("/api/v1", middleware_app.Session)
 	handler.AttachAuth(api.Group("/auth"))
 	handler.AttachUsers(api.Group("/users"))
+	handler.AttachChats(api.Group("/chats"))
 
 	handler.AttachStatic(e.Group("/*"))
 

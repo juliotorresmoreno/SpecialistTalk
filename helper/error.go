@@ -3,6 +3,7 @@ package helper
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -30,3 +31,7 @@ func MakeHTTPError(status int, err error) *echo.HTTPError {
 		Message: err.Error(),
 	}
 }
+
+var HTTPErrorInternalServerError = echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+var HTTPErrorUnauthorized = echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
+var HTTPErrorNotFound = echo.NewHTTPError(http.StatusNotFound, "not found")

@@ -2,8 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"errors"
-	"strings"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -13,34 +11,12 @@ import (
 // ACL s
 type ACL struct {
 	Owner string `json:"owner"`
-	Group string `json:"group"`
-}
-
-func (that ACL) IsAdmin() bool {
-	s := strings.Split(that.Group, ",")
-	for _, g := range s {
-		if g == "admin" {
-			return true
-		}
-	}
-	return false
 }
 
 type Rol string
 
 const RolUser = "user"
 const RolAdmin = "admin"
-
-func NewACL(user string, group string) (*ACL, error) {
-	if group != RolUser && group != RolAdmin {
-		return &ACL{}, errors.New("group is required")
-	}
-	ACL := &ACL{
-		Owner: user,
-		Group: group,
-	}
-	return ACL, nil
-}
 
 // User s
 type User struct {
@@ -142,7 +118,7 @@ func (that *User) UnmarshalJSON(b []byte) error {
 	that.Facebook = u.Facebook
 	that.Linkedin = u.Linkedin
 
-	that.ACL, err = NewACL(u.Username, RolUser)
+	that.ACL = &ACL{Owner: u.Username}
 	if err != nil {
 		return err
 	}

@@ -21,6 +21,7 @@ const withSession = function <T = any>(
     const dispatch = useAppDispatch()
 
     useEffect(() => {
+      if (!_session) return
       if (isload) return
       setIsload(true)
       const token = session?.token ?? ''

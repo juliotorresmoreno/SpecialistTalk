@@ -32,6 +32,10 @@ type Redis struct {
 	PoolSize int    `json:"poolSize" yaml:"poolSize"`
 }
 
+type Mongo struct {
+	DSN string `json:"dsn"          yaml:"dsn"`
+}
+
 // Config s
 type Config struct {
 	Env             string    `json:"env"             yaml:"env"`
@@ -42,6 +46,7 @@ type Config struct {
 	WriteBufferSize int       `json:"writeBufferSize" yaml:"writeBufferSize"`
 	Database        *Database `json:"database"        yaml:"database"`
 	Redis           *Redis    `json:"redis"           yaml:"redis"`
+	Mongo           *Mongo    `json:"mongo"           yaml:"mongo"`
 }
 
 var conf Config = Config{
@@ -114,12 +119,14 @@ func init() {
 	conf.Redis.Addr = fromEnvfString(conf.Redis.Addr, "REDIS_ADDR", "localhost:6379")
 	conf.Redis.DB = fromEnvfInt(conf.Redis.DB, "REDIS_DB", 0)
 	conf.Redis.Password = fromEnvfString(conf.Redis.Password, "REDIS_PWD", "")
-	conf.Redis.PoolSize = fromEnvfInt(conf.Redis.PoolSize, "POOL_SIZE", 50)
+	conf.Redis.PoolSize = fromEnvfInt(conf.Redis.PoolSize, "REDIS_POOL_SIZE", 50)
 
 	conf.Database.DSN = fromEnvfString(conf.Database.DSN, "DATABASE_DSN", "")
 	conf.Database.Driver = fromEnvfString(conf.Database.Driver, "DATABASE_DRIVER", "")
-	conf.Database.MaxOpenConns = fromEnvfInt(conf.Redis.DB, "MAX_OPEN_CONNS", 50)
-	conf.Database.MaxIdleConns = fromEnvfInt(conf.Redis.DB, "MAX_IDLE_CONNS", 5)
+	conf.Database.MaxOpenConns = fromEnvfInt(conf.Redis.DB, "DATABASE_MAX_OPEN_CONNS", 50)
+	conf.Database.MaxIdleConns = fromEnvfInt(conf.Redis.DB, "DATABASE_MAX_IDLE_CONNS", 5)
+
+	conf.Database.MaxIdleConns = fromEnvfInt(conf.Redis.DB, "MONGO_DSN", 5)
 }
 
 // GetConfig s

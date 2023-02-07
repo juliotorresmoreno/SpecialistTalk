@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 	"github.com/juliotorresmoreno/SpecialistTalk/db"
 	"github.com/juliotorresmoreno/SpecialistTalk/helper"
@@ -25,18 +28,45 @@ func (that *ChatsHandler) findUser(c echo.Context) error {
 		return err
 	}
 
-	conf := configs.GetConfig()
-	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
+	userID, _ := strconv.Atoi(c.Param("user_id"))
+	if session.ID == userID {
+		return helper.HTTPErrorUnauthorized
+	}
+
+	conn, err := db.GetConnectionPool()
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
 	}
 
 	u := &model.User{}
-	_, err = conn.SessionWithACL().Where("id = ?", c.Param("user_id")).Get(u)
+	ok, err := conn.Where("id = ?", c.Param("user_id")).Get(u)
 	if err != nil {
-		return echo.NewHTTPError(501, helper.ParseError(err).Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
 	}
-	return c.JSON(200, u)
+	if !ok {
+		return helper.HTTPErrorNotFound
+	}
+
+	conf := configs.GetConfig()
+	conn, err = db.GetConnectionPoolWithSession(conf.Database, session)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+	}
+
+	chat := &model.Chat{UserID: u.ID}
+	ok, err = conn.Get(chat)
+	if err != nil {
+		return echo.NewHTTPError(500, helper.ParseError(err).Error())
+	}
+	if !ok {
+		chat.Code = "any"
+		chat.Name = "any"
+		chat.ACL = &model.ACL{Owner: session.Username}
+		chat.UserID = userID
+		conn.InsertOne(chat)
+	}
+
+	return c.JSON(200, chat)
 }
 
 func (that *ChatsHandler) findUsers(c echo.Context) error {

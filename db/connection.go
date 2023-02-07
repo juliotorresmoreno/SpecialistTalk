@@ -40,16 +40,8 @@ func GetConnectionPool() (*Engine, error) {
 func GetConnectionPoolWithSession(conf *configs.Database, user *model.User) (*Engine, error) {
 	conn, err := GetConnectionPool()
 
-	r := fmt.Sprintf(
-		"(acl->>'owner' = '%v' or (acl->'groups'->'%v'->>'read')::boolean is true)",
-		user.Username,
-		user.ACL.Group,
-	)
-	w := fmt.Sprintf(
-		"(acl->>'owner' = '%v' or (acl->'groups'->'%v'->>'write')::boolean is true)",
-		user.Username,
-		user.ACL.Group,
-	)
+	r := fmt.Sprintf("acl->>'owner' = '%v'", user.Username)
+	w := fmt.Sprintf("acl->>'owner' = '%v'", user.Username)
 
 	engine := &Engine{Engine: conn.Engine}
 	engine.permisionQueryRead = r
