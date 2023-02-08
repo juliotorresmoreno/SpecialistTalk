@@ -23,7 +23,7 @@ func Paginate(c echo.Context) (int, int) {
 func ValidateSession(c echo.Context) (*model.User, error) {
 	session := c.Get("session")
 	if session == nil {
-		return nil, echo.NewHTTPError(401, "Unauthorized")
+		return nil, echo.NewHTTPError(401, "unauthorized")
 	}
 	return session.(*model.User), nil
 }

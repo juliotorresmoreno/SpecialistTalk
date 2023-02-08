@@ -1,16 +1,22 @@
 import React from 'react'
 import Header from '../components/Header'
 import withChat from '../hoc/withChat'
+import { IChatWithUser } from '../models/chat'
 
-const _MessagesPage: React.FC = () => {
+type _MessagesPageProps = {
+  chat: IChatWithUser
+}
+
+const _MessagesPage: React.FC<_MessagesPageProps> = ({ chat }) => {
   const header = {
-    title: 'Messages',
+    title: chat.name,
     description: 'programa de super poderes',
   }
+
   return (
     <>
       <Header {...header} />
-      <main>dfasd</main>
+      <main>{JSON.stringify(chat)}</main>
     </>
   )
 }

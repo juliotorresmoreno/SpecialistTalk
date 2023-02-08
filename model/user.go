@@ -20,24 +20,24 @@ const RolAdmin = "admin"
 
 // User s
 type User struct {
-	ID            int       `xorm:"id BIGSERIAL not null autoincr pk"           valid:""`
+	ID            int       `xorm:"id BIGSERIAL not null autoincr pk"         valid:""`
 	Username      string    `xorm:"username varchar(20) not null unique"      valid:"username,required"`
 	Email         string    `xorm:"email varchar(200) not null unique"        valid:"email,required"`
 	Name          string    `xorm:"name varchar(50) not null"                 valid:"name,required"`
 	LastName      string    `xorm:"lastname varchar(50) not null"             valid:"name,required"`
-	DateBirth     time.Time `xorm:"date_birth DATE"`
-	ImgSrc        string    `xorm:"imgSrc text"`
-	Country       string    `xorm:"country varchar(2)"`
-	Nationality   string    `xorm:"nationality varchar(2)"`
-	Facebook      string    `xorm:"facebook varchar(255)"`
-	Linkedin      string    `xorm:"linkedin varchar(255)"`
-	Password      string    `xorm:"password varchar(100) not null"                                json:"-"`
+	DateBirth     time.Time `xorm:"date_birth DATE"                           valid:""`
+	ImgSrc        string    `xorm:"imgSrc text"                               valid:""`
+	Country       string    `xorm:"country varchar(2)"                        valid:""`
+	Nationality   string    `xorm:"nationality varchar(2)"                    valid:""`
+	Facebook      string    `xorm:"facebook varchar(255)"                     valid:""`
+	Linkedin      string    `xorm:"linkedin varchar(255)"                     valid:""`
+	Password      string    `xorm:"password varchar(100) not null"            valid:""            `
 	ValidPassword string    `xorm:"-"                                         valid:"password"    json:"-"`
-	RecoveryToken string    `xorm:"recovery_token varchar(100) not null"`
-	ACL           *ACL      `xorm:"acl json not null"                         valid:"required"`
-	CreatedAt     time.Time `xorm:"created_at created"`
-	UpdatedAt     time.Time `xorm:"updated_at updated"`
-	Version       int       `xorm:"version version"`
+	RecoveryToken string    `xorm:"recovery_token varchar(100) not null"      valid:""            json:"-"`
+	ACL           *ACL      `xorm:"acl json not null"                         valid:"required"    json:"-"`
+	CreatedAt     time.Time `xorm:"created_at created"                        valid:""            json:"-"`
+	UpdatedAt     time.Time `xorm:"updated_at updated"                        valid:""            json:"-"`
+	Version       int       `xorm:"version version"                           valid:""            json:"-"`
 }
 
 // TableName s

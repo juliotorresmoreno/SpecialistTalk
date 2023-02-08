@@ -26,18 +26,26 @@ const withSession = function <T = any>(
       setIsload(true)
       const token = session?.token ?? ''
 
-      fetch(url, {
+      const opts: RequestInit = {
         headers: {
           'X-API-Key': token,
         },
-      }).then(async (response) => {
-        if (response.ok) {
-          const iuser: IUser = await response.json()
-          const session: ISession = { token, user: iuser }
-          setSession(session)
-          dispatch(authSlice.actions.setSession(session))
-        }
-      })
+      }
+
+      fetch(url, opts)
+        .then(async (response) => {
+          if (response.ok) {
+            const iuser: IUser = await response.json()
+            const session: ISession = { token, user: iuser }
+            setSession(session)
+            dispatch(authSlice.actions.setSession(session))
+            return
+          }
+          throw new Error('Unauthorized')
+        })
+        .catch(() => {
+          dispatch(authSlice.actions.logout())
+        })
     }, [session])
 
     return <WrappedComponent {...props} />

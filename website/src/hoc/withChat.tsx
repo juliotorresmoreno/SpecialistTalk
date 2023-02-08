@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import config from '../config'
-import { User } from '../models/user'
+import { IChat } from '../models/chat'
 import ErrorPage from '../pages/ErrorPage'
+import LoadingPage from '../pages/LoadingPage'
 import { useAppSelector } from '../store/hooks'
 import { HTTPError } from '../types/http'
 
@@ -17,14 +18,14 @@ const withChat = function <T = any>(
 ) {
   const result: React.FC<T & ResultProps> = (props) => {
     const session = useAppSelector((state) => state.auth.session)
-    const [isload, setIsload] = useState<string|null>(null)
+    const [isload, setIsload] = useState<string | null>(null)
     const [isloading, setIsloading] = useState<boolean>(false)
-    const [chat, setChat] = useState<User | null>(null)
+    const [chat, setChat] = useState<IChat | null>(null)
     const [error, setError] = useState<HTTPError | null>(null)
-    const id = useParams<{id:string}>().id as string
+    const id = useParams<{ id: string }>().id as string
 
     useEffect(() => {
-      if (isload===id) return
+      if (isload === id) return
       setIsloading(true)
       setIsload(id)
 
@@ -47,9 +48,9 @@ const withChat = function <T = any>(
 
     if (error) return <ErrorPage error={error} />
 
-    if (isloading) return <>Loading</>
+    if (!chat || isloading) return <LoadingPage />
 
-    return <WrappedComponent {...props} />
+    return <WrappedComponent chat={chat} {...props} />
   }
   return result
 }
