@@ -16,19 +16,64 @@ type ChatsHandler struct{}
 // AttachChats s
 func AttachChats(g *echo.Group) {
 	u := &ChatsHandler{}
-	g.GET("", u.findUsers)
-	g.GET("/:user_id", u.findUser)
-	g.PUT("", u.addUser)
-	g.PATCH("/:user_id", u.updateUser)
+	g.GET("", u.find)
+	g.GET("/:code", u.get)
+	g.PUT("/:user_id", u.add)
+	g.PATCH("/:user_id", u.update)
 }
 
-type findUserResponse struct {
-	Name string      `json:"name"`
-	Code string      `json:"code"`
-	User *model.User `json:"user"`
+func (that *ChatsHandler) get(c echo.Context) error {
+	session, err := helper.ValidateSession(c)
+	if err != nil {
+		return err
+	}
+	code := c.Param("code")
+
+	conf := configs.GetConfig()
+	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+	}
+
+	chat := &model.Chat{Code: code}
+	if ok, err := conn.Get(chat); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+	} else if !ok {
+		return helper.HTTPErrorUnauthorized
+	}
+
+	return c.JSON(200, map[string]interface{}{
+		"id":       chat.ID,
+		"user_id":  chat.UserID,
+		"name":     chat.Name,
+		"code":     chat.Code,
+		"status":   chat.Status,
+		"messages": []string{"hola"},
+	})
 }
 
-func (that *ChatsHandler) findUser(c echo.Context) error {
+func (that *ChatsHandler) find(c echo.Context) error {
+	session, err := helper.ValidateSession(c)
+	if err != nil {
+		return err
+	}
+
+	conf := configs.GetConfig()
+	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+	}
+
+	chats := make([]model.Chat, 0)
+	err = conn.Find(&chats)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+	}
+
+	return c.JSON(200, chats)
+}
+
+func (that *ChatsHandler) add(c echo.Context) error {
 	session, err := helper.ValidateSession(c)
 	if err != nil {
 		return err
@@ -86,39 +131,9 @@ func (that *ChatsHandler) findUser(c echo.Context) error {
 		_, _ = conn.InsertOne(chat)
 	}
 
-	return c.JSON(200, &findUserResponse{
-		Name: chat.Name,
-		Code: chat.Code,
-		User: u,
-	})
+	return c.JSON(200, chat)
 }
 
-func (that *ChatsHandler) findUsers(c echo.Context) error {
-	session, err := helper.ValidateSession(c)
-	if err != nil {
-		return err
-	}
-
-	conf := configs.GetConfig()
-	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
-	}
-
-	chats := make([]model.Chat, 0)
-	conn.ShowSQL(true)
-	err = conn.Find(&chats)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
-	}
-
-	return c.JSON(200, chats)
-}
-
-func (that *ChatsHandler) addUser(c echo.Context) error {
-	return nil
-}
-
-func (that *ChatsHandler) updateUser(c echo.Context) error {
+func (that *ChatsHandler) update(c echo.Context) error {
 	return nil
 }

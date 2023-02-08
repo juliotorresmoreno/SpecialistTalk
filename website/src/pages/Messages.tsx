@@ -1,5 +1,6 @@
 import React from 'react'
 import Header from '../components/Header'
+import { Messages } from '../components/Social/Messages'
 import withChat from '../hoc/withChat'
 import { IChatWithUser } from '../models/chat'
 
@@ -16,7 +17,9 @@ const _MessagesPage: React.FC<_MessagesPageProps> = ({ chat }) => {
   return (
     <>
       <Header {...header} />
-      <main>{JSON.stringify(chat)}</main>
+      <main>
+        <Messages />
+      </main>
     </>
   )
 }

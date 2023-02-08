@@ -25,6 +25,7 @@ func (s *ServerHTTP) Listen() error {
 func NewServer() *ServerHTTP {
 	e := echo.New()
 	svr := &ServerHTTP{e}
+	config := configs.GetConfig()
 
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Skipper: func(c echo.Context) bool {
@@ -60,6 +61,13 @@ func NewServer() *ServerHTTP {
 	handler.AttachSwaggerApi(e.Group("/docs"))
 
 	api := e.Group("/api/v1", middleware_app.Session)
+
+	if config.Env != "production" {
+		api.Use(middleware_app.TimeSleep(&middleware_app.TimeSleepConfig{
+			Duration: 500 * time.Millisecond,
+		}))
+	}
+
 	handler.AttachAuth(api.Group("/auth"))
 	handler.AttachUsers(api.Group("/users"))
 	handler.AttachChats(api.Group("/chats"))

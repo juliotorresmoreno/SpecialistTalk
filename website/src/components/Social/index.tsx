@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Contacts } from './Contacts'
+import Contacts from './Contacts'
 import Provider from './Provider'
 
 const height = '35px'

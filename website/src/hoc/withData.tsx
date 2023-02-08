@@ -11,23 +11,21 @@ type ResultProps = {
   [x: string | number | symbol]: any
 } & React.PropsWithChildren
 
-const url = config.baseUrl + '/chats/'
-
-const withChat = function <T = any>(
-  WrappedComponent: React.ComponentType<any>
+const withData = function <T = any>(
+  WrappedComponent: React.ComponentType<any>,
+  url: string
 ) {
   const result: React.FC<T & ResultProps> = (props) => {
     const session = useAppSelector((state) => state.auth.session)
     const [isloading, setIsloading] = useState<boolean>(false)
-    const [chat, setChat] = useState<IChat | null>(null)
+    const [data, setData] = useState<IChat | null>(null)
     const [error, setError] = useState<HTTPError | null>(null)
-    const id = useParams<{ id: string }>().id as string
 
     useEffect(() => {
       setIsloading(true)
       setError(null)
 
-      fetch(url + id, {
+      fetch(url, {
         headers: {
           'X-API-Key': session?.token ?? '',
         },
@@ -38,17 +36,17 @@ const withChat = function <T = any>(
             setError(content)
             return
           }
-          setChat(content)
+          setData(content)
         })
         .catch((err: Error) => setError({ message: err.message }))
         .finally(() => setIsloading(false))
-    }, [session, id])
+    }, [session])
 
     if (error) return <ErrorPage error={error} />
-    if (!chat || isloading) return <Loading />
-    return <WrappedComponent chat={chat} {...props} />
+    if (!data || isloading) return <Loading />
+    return <WrappedComponent payload={data} {...props} />
   }
   return result
 }
 
-export default withChat
+export default withData

@@ -6,14 +6,11 @@ import Social from '../Social'
 import Aside from '../Aside'
 import { Messages } from '../Social/Messages'
 import SocialContext from '../../contexts/SocialContext'
-import withSession from '../../hoc/withSession'
 import { useAppSelector } from '../../store/hooks'
 
 type LayoutProps = {} & React.PropsWithChildren
 
-type _LayoutProps = {} & LayoutProps
-
-const _Layout: React.FC<_LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   const session = useAppSelector((state) => state.auth.session)
   const { activeChat } = useContext(SocialContext)
 
@@ -37,7 +34,5 @@ const _Layout: React.FC<_LayoutProps> = ({ children }) => {
     </>
   )
 }
-
-const Layout = withSession<LayoutProps>(_Layout)
 
 export default Layout
