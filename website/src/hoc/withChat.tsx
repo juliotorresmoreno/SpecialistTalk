@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useLocation, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import config from '../config'
 import { User } from '../models/user'
 import ErrorPage from '../pages/ErrorPage'
@@ -17,14 +17,16 @@ const withChat = function <T = any>(
 ) {
   const result: React.FC<T & ResultProps> = (props) => {
     const session = useAppSelector((state) => state.auth.session)
-    const [isload, setIsload] = useState(false)
+    const [isload, setIsload] = useState<string|null>(null)
+    const [isloading, setIsloading] = useState<boolean>(false)
     const [chat, setChat] = useState<User | null>(null)
     const [error, setError] = useState<HTTPError | null>(null)
-    const { id } = useParams()
+    const id = useParams<{id:string}>().id as string
 
     useEffect(() => {
-      if (isload) return
-      setIsload(true)
+      if (isload===id) return
+      setIsloading(true)
+      setIsload(id)
 
       fetch(url + id, {
         headers: {
@@ -39,14 +41,13 @@ const withChat = function <T = any>(
           }
           setChat(content)
         })
-        .catch((err: Error) => {
-          setError({ message: err.message })
-        })
-    }, [session, isload])
+        .catch((err: Error) => setError({ message: err.message }))
+        .finally(() => setIsloading(false))
+    }, [session, id, isload])
 
     if (error) return <ErrorPage error={error} />
 
-    if (!chat) return <>Loading</>
+    if (isloading) return <>Loading</>
 
     return <WrappedComponent {...props} />
   }

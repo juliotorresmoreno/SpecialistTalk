@@ -29,6 +29,9 @@ func NewServer() *ServerHTTP {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Skipper: func(c echo.Context) bool {
 			path := c.Request().URL.Path
+			if strings.Contains(path, ".") {
+				return true
+			}
 			return len(path) >= 8 && path[:8] == "/api/v1/"
 		},
 	}))
