@@ -32,7 +32,9 @@ export const Messages = () => {
       <Content>sss</Content>
       <InputContainer>
         <Input />
-        <Button>Send</Button>
+        <Button>
+          <span className="material-symbols-outlined">send</span>
+        </Button>
       </InputContainer>
     </Container>
   )

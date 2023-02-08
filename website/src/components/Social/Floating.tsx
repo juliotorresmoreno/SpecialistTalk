@@ -42,7 +42,13 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
     result.length > 0
       ? result.map((el) => ({
           id: el.id.toString(),
-          name: el.getFullName(),
+          name: (
+            <>
+              <span className="material-symbols-outlined">person_add</span>
+              &nbsp;
+              {el.getFullName()}
+            </>
+          ),
           handler: () => {
             const url = config.baseUrl + '/chats/' + el.id
             fetch(url, {
@@ -67,7 +73,13 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
         }))
       : payload.map((el) => ({
           id: el.code,
-          name: el.name,
+          name: (
+            <>
+              <span className="material-symbols-outlined">person</span>
+              &nbsp;
+              {el.name}
+            </>
+          ),
           handler: () => {
             navigate('/chats/' + el.code)
           },
