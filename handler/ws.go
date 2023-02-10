@@ -112,6 +112,7 @@ func readWS(cli *client) {
 		if err != nil {
 			remove <- cli
 			_ = cli.conn.Close()
+			break
 		}
 	}
 }

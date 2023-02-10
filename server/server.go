@@ -36,7 +36,9 @@ func NewServer() *ServerHTTP {
 			return len(path) >= 8 && path[:8] == "/api/v1/"
 		},
 	}))
-	e.Use(middleware.Recover())
+	if config.Env == "production" {
+		e.Use(middleware.Recover())
+	}
 
 	p := prometheus.NewPrometheus("echo", nil)
 	p.Use(e)
@@ -56,7 +58,7 @@ func NewServer() *ServerHTTP {
 	e.Use(middleware.CORS())
 	// e.Use(middleware.CSRF())
 
-	handler.AttachWS(e.Group("/ws", middleware_app.Session))
+	handler.AttachWS(e.Group("/realtime", middleware_app.Session))
 
 	handler.AttachSwaggerApi(e.Group("/docs"))
 

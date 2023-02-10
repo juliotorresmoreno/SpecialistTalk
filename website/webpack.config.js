@@ -60,6 +60,7 @@ const configuration = {
       ],
     }), */
   ],
+  devtool: isDev ? 'source-map' : false,
   mode: isDev ? 'development' : 'production',
   cache: false,
   devServer: {

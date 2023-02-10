@@ -135,6 +135,13 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		_, _ = conn.InsertOne(chat)
 	}
 
+	SendToClient <- &Message{
+		Username: session.Username,
+		Notification: model.Notification{
+			Type: "contacts_update",
+		},
+	}
+
 	return c.JSON(200, chat)
 }
 
