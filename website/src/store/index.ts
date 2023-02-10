@@ -18,7 +18,6 @@ const persistConfig: PersistConfig<any> = {
   key: 'root',
   storage: storage,
   blacklist: [],
-  whitelist: ['auth'],
 }
 
 export const rootReducers = combineReducers({

@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import useFormValue from '../../hooks/useFormValue'
 import Button from '../Button'
 import _Input from '../Input'
 
@@ -27,11 +28,18 @@ const Input = styled(_Input)`
 `
 
 export const Messages = () => {
+  const [message, setMessage] = useFormValue('')
+  const onKeyUp: React.KeyboardEventHandler<HTMLInputElement> = (evt) => {
+    if (evt.key !== 'Enter') return
+
+    console.log('message:', message)
+  }
+
   return (
     <Container>
-      <Content>sss</Content>
+      <Content>Messages</Content>
       <InputContainer>
-        <Input />
+        <Input onChange={setMessage} onKeyUp={onKeyUp} value={message} />
         <Button>
           <span className="material-symbols-outlined">send</span>
         </Button>
