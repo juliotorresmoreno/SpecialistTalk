@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 	"github.com/juliotorresmoreno/SpecialistTalk/db"
@@ -18,7 +17,7 @@ func AttachChats(g *echo.Group) {
 	u := &ChatsHandler{}
 	g.GET("", u.find)
 	g.GET("/:code", u.get)
-	g.PUT("/:user_id", u.add)
+	g.POST("", u.add)
 	g.PATCH("/:user_id", u.update)
 }
 
@@ -73,14 +72,19 @@ func (that *ChatsHandler) find(c echo.Context) error {
 	return c.JSON(200, chats)
 }
 
+type addPayload struct {
+	UserID int `json:"user_id"`
+}
+
 func (that *ChatsHandler) add(c echo.Context) error {
 	session, err := helper.ValidateSession(c)
 	if err != nil {
 		return err
 	}
 
-	userID, _ := strconv.Atoi(c.Param("user_id"))
-	if session.ID == userID {
+	payload := &addPayload{}
+	_ = c.Bind(payload)
+	if session.ID == payload.UserID {
 		return helper.HTTPErrorUnauthorized
 	}
 
@@ -90,7 +94,7 @@ func (that *ChatsHandler) add(c echo.Context) error {
 	}
 
 	u := &model.User{}
-	ok, err := conn.Where("id = ?", c.Param("user_id")).Get(u)
+	ok, err := conn.Where("id = ?", payload.UserID).Get(u)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
 	}

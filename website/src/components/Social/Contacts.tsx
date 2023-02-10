@@ -24,7 +24,6 @@ const FloatingContainer = styled.div`
   width: 100%;
   transform: translateY(-100%);
   background-color: red;
-  // padding-top: calc(var(--spacing-v1) * 2);
 `
 
 type ContactsProps = {}

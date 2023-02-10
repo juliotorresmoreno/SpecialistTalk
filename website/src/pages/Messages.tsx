@@ -1,7 +1,8 @@
 import React from 'react'
 import Header from '../components/Header'
 import { Messages } from '../components/Social/Messages'
-import withChat from '../hoc/withChat'
+import config from '../config'
+import withDataById from '../hoc/withDataById'
 import { IChatWithUser } from '../models/chat'
 
 type _MessagesPageProps = {
@@ -24,6 +25,7 @@ const _MessagesPage: React.FC<_MessagesPageProps> = ({ chat }) => {
   )
 }
 
-const MessagesPage = withChat(_MessagesPage)
+const url = config.baseUrl + '/chats'
+const MessagesPage = withDataById(_MessagesPage, url)
 
 export default MessagesPage

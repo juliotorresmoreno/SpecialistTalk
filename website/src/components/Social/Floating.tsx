@@ -1,12 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
 import config from '../../config'
 import withData from '../../hoc/withData'
 import useSearch from '../../hooks/useSearch'
 import { IChat } from '../../models/chat'
-import { useAppSelector } from '../../store/hooks'
-import { HTTPError } from '../../types/http'
+import { useAdd } from '../../services/chats'
 import Input from '../Input'
 
 const ContactsContainer = styled.div`
@@ -34,9 +33,10 @@ type _FloatingProps = {
 
 const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
   const url = '/users'
+  const [ignore, setIgnore] = useState<any>({})
   const [search, setSearch, result] = useSearch(url)
   const navigate = useNavigate()
-  const session = useAppSelector((state) => state.auth.session)
+  const { add } = useAdd()
 
   const users =
     result.length > 0
@@ -50,25 +50,15 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
             </>
           ),
           handler: () => {
-            const url = config.baseUrl + '/chats/' + el.id
-            fetch(url, {
-              method: 'PUT',
-              headers: {
-                'X-API-Key': session?.token ?? '',
-              },
-            })
-              .then(async (response) => {
-                const content = await response.json()
-                if (response.ok) {
-                  const chat: IChat = content
-                  navigate('/chats/' + chat.code)
-                  return
-                }
-                throw content
+            add({ user_id: el.id })
+              .then(async (chat) => {
+                setIgnore({
+                  ...ignore,
+                  [chat.id]: true,
+                })
+                navigate('/chats/' + chat.code)
               })
-              .catch((err: Error | HTTPError) => {
-                alert(err.message)
-              })
+              .catch((err: Error) => {})
           },
         }))
       : payload.map((el) => ({
@@ -89,11 +79,14 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
     <>
       <InputSearch type="text" value={search} onChange={setSearch} />
       <ContactsContainer>
-        {users.map((contact) => (
-          <Contact key={contact.id} onClick={contact.handler}>
-            {contact.name}
-          </Contact>
-        ))}
+        {users.map((contact) => {
+          if (ignore[contact.id]) return null
+          return (
+            <Contact key={contact.id} onClick={contact.handler}>
+              {contact.name}
+            </Contact>
+          )
+        })}
       </ContactsContainer>
     </>
   )

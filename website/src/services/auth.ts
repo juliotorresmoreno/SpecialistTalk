@@ -4,7 +4,7 @@ import { useGetData } from './api'
 
 export function useGetSession() {
   const url = config.baseUrl + '/auth/session'
-  const { data, error, isLoading } = useGetData(url, { onlyLogged: true })
+  const { error, isLoading, get } = useGetData(url)
 
-  return { isLoading, error, session: data }
+  return { isLoading, error, get }
 }
