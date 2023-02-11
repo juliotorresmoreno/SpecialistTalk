@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import Contacts from './Contacts'
 import Provider from './Provider'
 
-const height = '35px'
+const height = 'calc(var(--spacing-v1) * 3.5)'
 const width = '200px'
 
 const Container = styled.div`

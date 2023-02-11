@@ -33,7 +33,8 @@ type Redis struct {
 }
 
 type Mongo struct {
-	DSN string `json:"dsn"          yaml:"dsn"`
+	DSN      string `json:"dsn"      yaml:"dsn"`
+	Database string `json:"database" yaml:"database"`
 }
 
 // Config s
@@ -52,6 +53,7 @@ type Config struct {
 var conf Config = Config{
 	Database:        &Database{},
 	Redis:           &Redis{},
+	Mongo:           &Mongo{},
 	ReadBufferSize:  0,
 	WriteBufferSize: 0,
 }
@@ -126,7 +128,8 @@ func init() {
 	conf.Database.MaxOpenConns = fromEnvfInt(conf.Redis.DB, "DATABASE_MAX_OPEN_CONNS", 50)
 	conf.Database.MaxIdleConns = fromEnvfInt(conf.Redis.DB, "DATABASE_MAX_IDLE_CONNS", 5)
 
-	conf.Database.MaxIdleConns = fromEnvfInt(conf.Redis.DB, "MONGO_DSN", 5)
+	conf.Mongo.DSN = fromEnvfString(conf.Mongo.DSN, "MONGO_DSN", "")
+	conf.Mongo.Database = fromEnvfString(conf.Mongo.Database, "MONGO_DATABASE", "")
 }
 
 // GetConfig s

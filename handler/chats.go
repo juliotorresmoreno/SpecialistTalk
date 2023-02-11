@@ -72,18 +72,17 @@ func (that *ChatsHandler) find(c echo.Context) error {
 	return c.JSON(200, chats)
 }
 
-type addPayload struct {
-	UserID int `json:"user_id"`
+type POSTChatsAddPayload struct {
+	UserID int `json:"user_id" valid:"required"`
 }
 
 func (that *ChatsHandler) add(c echo.Context) error {
-	session, err := helper.ValidateSession(c)
+	payload := &POSTChatsAddPayload{}
+	session, err := helper.GetPayload(c, payload)
 	if err != nil {
 		return err
 	}
 
-	payload := &addPayload{}
-	_ = c.Bind(payload)
 	if session.ID == payload.UserID {
 		return helper.HTTPErrorUnauthorized
 	}
@@ -128,16 +127,16 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		chat2.Code = token
 		chat2.Name = session.Name + " " + session.LastName
 		chat2.ACL = &model.ACL{Owner: u.Username}
-		chat.Status = model.ChatStatusCreated
+		chat2.Status = model.ChatStatusCreated
 		if err = chat.Check(); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
 		}
-		_, _ = conn.InsertOne(chat)
+		_, _ = conn.InsertOne(chat2)
 	}
 
-	SendToClient <- &Message{
+	SendToClient <- &MessageToClient{
 		Username: session.Username,
-		Notification: model.Notification{
+		Notification: &model.Notification{
 			Type: "contacts_update",
 		},
 	}

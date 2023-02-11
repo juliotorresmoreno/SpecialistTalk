@@ -73,6 +73,7 @@ func NewServer() *ServerHTTP {
 	handler.AttachAuth(api.Group("/auth"))
 	handler.AttachUsers(api.Group("/users"))
 	handler.AttachChats(api.Group("/chats"))
+	handler.AttachMessages(api.Group("/messages"))
 
 	handler.AttachStatic(e.Group("/*"))
 

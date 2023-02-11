@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/juliotorresmoreno/SpecialistTalk/db"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/labstack/echo/v4"
 )
@@ -13,14 +15,19 @@ type client struct {
 	username string
 }
 
-type Message struct {
+type MessageToClient struct {
 	Username     string
-	Notification model.Notification
+	Notification *model.Notification
+}
+type MessageToGroup struct {
+	Code         string
+	Notification *model.Notification
 }
 
 var register = make(chan *client)
 var remove = make(chan *client)
-var SendToClient = make(chan *Message)
+var SendToClient = make(chan *MessageToClient)
+var SendToGroup = make(chan *MessageToGroup)
 
 var clients = map[string]map[*client]bool{}
 
@@ -53,9 +60,9 @@ func (u *HandlerWS) GET(c echo.Context) error {
 	_session := c.Get("session")
 	if _session == nil {
 		_ = ws.WriteJSON(model.Notification{
-			Type:    "error",
-			Message: "Unauthorized"},
-		)
+			Type:    string(model.NotificationError),
+			Payload: "Unauthorized",
+		})
 		return echo.NewHTTPError(401, "Unauthorized")
 	}
 	session := _session.(*model.User)
@@ -63,11 +70,11 @@ func (u *HandlerWS) GET(c echo.Context) error {
 	cli := &client{conn: ws, username: session.Username}
 	register <- cli
 
-	SendToClient <- &Message{
+	SendToClient <- &MessageToClient{
 		session.Username,
-		model.Notification{
+		&model.Notification{
 			Type:    string(model.NotificationEvent),
-			Message: "Connected",
+			Payload: "Connected",
 		},
 	}
 
@@ -76,6 +83,10 @@ func (u *HandlerWS) GET(c echo.Context) error {
 }
 
 func (u *HandlerWS) Register() {
+	conn, err := db.GetConnectionPool()
+	if err != nil {
+		log.Fatal(err)
+	}
 	for {
 		select {
 		case c := <-register:
@@ -92,9 +103,25 @@ func (u *HandlerWS) Register() {
 				delete(slot, c)
 			}
 		case c := <-SendToClient:
-			if slot, ok := clients[c.Username]; ok {
+			username := c.Username
+			if slot, ok := clients[username]; ok {
 				for client := range slot {
 					_ = client.conn.WriteJSON(c.Notification)
+				}
+			}
+		case c := <-SendToGroup:
+			chats := make([]model.Chat, 0)
+			err = conn.Where("code = ?", c.Code).Find(&chats)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			for _, chat := range chats {
+				username := chat.ACL.Owner
+				if slot, ok := clients[username]; ok {
+					for client := range slot {
+						_ = client.conn.WriteJSON(c.Notification)
+					}
 				}
 			}
 		}
