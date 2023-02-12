@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
-import config from '../../config'
-import { wsHandlers } from '../../handlers'
-import { useAppSelector } from '../../store/hooks'
+import config from '../config'
+import { wsHandlers } from '../handlers'
+import { useAppSelector } from '../store/hooks'
 
 type WebsocketProps = {} & React.PropsWithChildren
 
@@ -30,8 +30,11 @@ const Websocket: React.FC<WebsocketProps> = ({ children }) => {
       if (_socket !== socket) _socket.close()
 
       const data = JSON.parse(evt.data)
+
       hMessage.forEach((h) => {
-        if ((h as any).type === data.type) h.handler(data)
+        if ((h as any).type === data.type) {
+          h.handler(data)
+        }
       })
     })
 

@@ -1,13 +1,17 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 	"github.com/juliotorresmoreno/SpecialistTalk/db"
 	"github.com/juliotorresmoreno/SpecialistTalk/helper"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
+	"github.com/juliotorresmoreno/SpecialistTalk/services"
 	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ChatsHandler struct{}
@@ -41,13 +45,30 @@ func (that *ChatsHandler) get(c echo.Context) error {
 		return helper.HTTPErrorUnauthorized
 	}
 
+	mongoCli, err := services.GetPoolMongo()
+	if err != nil {
+		return helper.HTTPErrorInternalServerError
+	}
+
+	collectionName := "conversation_" + code
+	collection := mongoCli.Database(conf.Mongo.Database).Collection(collectionName)
+	limit := int64(10)
+	curr, _ := collection.Find(context.Background(), map[string]interface{}{}, &options.FindOptions{
+		Limit: &limit,
+		Sort:  bson.D{{Key: "created_at", Value: -1}},
+	})
+
+	messages := make([]model.Message, 0)
+	_ = curr.All(context.Background(), &messages)
+	helper.Reverse(messages)
+
 	return c.JSON(200, map[string]interface{}{
 		"id":       chat.ID,
 		"user_id":  chat.UserID,
 		"name":     chat.Name,
 		"code":     chat.Code,
 		"status":   chat.Status,
-		"messages": []string{"hola"},
+		"messages": messages,
 	})
 }
 

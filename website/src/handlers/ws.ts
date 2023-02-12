@@ -1,4 +1,6 @@
+import chatsSlice from '../features/chats'
 import { Message } from '../models/message'
+import { store } from '../store'
 import HandlerManager from './handler'
 
 const handlers = new HandlerManager(
@@ -12,14 +14,19 @@ const handlers = new HandlerManager(
     event: 'message',
     type: 'message',
     handler: function (data: Message) {
-      console.log('message message', data)
+      const code = data.payload.code
+      const user = store.getState().auth.session?.user
+      const addNotification = chatsSlice.actions.addNotification
+      if (data.payload.data.from != user?.id) {
+        store.dispatch(addNotification(code))
+      }
     },
   },
   {
     event: 'message',
     type: 'event',
     handler: function (data: Message) {
-      console.log('message event', data)
+      console.log('event', data)
     },
   },
   {

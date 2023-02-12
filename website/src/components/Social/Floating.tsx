@@ -6,6 +6,7 @@ import withData from '../../hoc/withData'
 import useSearch from '../../hooks/useSearch'
 import { IChat } from '../../models/chat'
 import { useAdd } from '../../services/chats'
+import { useAppSelector } from '../../store/hooks'
 import Input from '../Input'
 
 const ContactsContainer = styled.div`
@@ -15,7 +16,8 @@ const ContactsContainer = styled.div`
   padding: var(--spacing-v1);
 `
 
-const Contact = styled.div`
+type ContactProps = { notification: boolean }
+const Contact = styled.div<ContactProps>`
   height: auto;
   line-height: initial;
   cursor: pointer;
@@ -23,6 +25,8 @@ const Contact = styled.div`
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+
+  color: ${({ notification }) => (notification ? 'var(--bs-orange)' : 'black')};
 `
 
 const InputSearch = Input
@@ -32,6 +36,7 @@ type _FloatingProps = {
 }
 
 const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
+  const notifications = useAppSelector((state) => state.chats.notifications)
   const url = '/users'
   const [ignore, setIgnore] = useState<any>({})
   const [search, setSearch, result] = useSearch(url)
@@ -82,7 +87,11 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
         {users.map((contact) => {
           if (ignore[contact.id]) return null
           return (
-            <Contact key={contact.id} onClick={contact.handler}>
+            <Contact
+              notification={notifications[contact.id]}
+              key={contact.id}
+              onClick={contact.handler}
+            >
               {contact.name}
             </Contact>
           )

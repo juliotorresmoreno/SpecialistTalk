@@ -23,7 +23,7 @@ const FloatingContainer = styled.div`
   height: calc(100vh - 106px);
   width: 100%;
   transform: translateY(-100%);
-  background-color: red;
+  background-color: var(--bs-gray-200);
 `
 
 type ContactsProps = {}
