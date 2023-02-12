@@ -58,13 +58,13 @@ func (that *MessagesHandler) add(c echo.Context) error {
 	conf := configs.GetConfig()
 	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	chat := &model.Chat{Code: payload.Code}
 	ok, err := conn.Get(chat)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	} else if !ok {
 		return helper.HTTPErrorNotFound
 	}

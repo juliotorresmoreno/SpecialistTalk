@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -36,7 +35,7 @@ func (el *AuthHandler) POSTSingUp(c echo.Context) error {
 	p := &POSTSingUpPayload{}
 	err = c.Bind(p)
 	if err != nil {
-		return helper.MakeHTTPError(http.StatusBadRequest, errors.New("body has not valid format"))
+		return helper.MakeHTTPError(http.StatusBadRequest, "body has not valid format")
 	}
 
 	u := &model.User{}
@@ -46,7 +45,7 @@ func (el *AuthHandler) POSTSingUp(c echo.Context) error {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	if exists {
-		return helper.MakeHTTPError(http.StatusUnauthorized, errors.New("user already exists"))
+		return helper.MakeHTTPError(http.StatusUnauthorized, "user already exists")
 	}
 
 	u.Name = p.Name
@@ -60,11 +59,15 @@ func (el *AuthHandler) POSTSingUp(c echo.Context) error {
 
 	if err = u.Check(); err != nil {
 		if strings.Contains(err.Error(), "ValidPassword") {
-			err = errors.New("password: the policy is not followed")
-		} else {
-			err = errors.New(strings.ToLower(err.Error()))
+			return helper.MakeHTTPError(
+				http.StatusBadRequest,
+				"password: the policy is not followed",
+			)
 		}
-		return helper.MakeHTTPError(http.StatusBadRequest, err)
+		return helper.MakeHTTPError(
+			http.StatusBadRequest,
+			strings.ToLower(err.Error()),
+		)
 	}
 
 	err = u.SetPassword(p.Password)
@@ -90,35 +93,26 @@ type POSTLoginPayload struct {
 func (el *AuthHandler) POSTLogin(c echo.Context) error {
 	conn, err := db.GetConnectionPool()
 	if err != nil {
-		return &echo.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		}
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	p := &POSTLoginPayload{}
 	err = c.Bind(p)
 	if err != nil {
-		return &echo.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		}
+		return helper.MakeHTTPError(http.StatusBadRequest, err)
 	}
 	u := &model.User{}
 	u.Email = p.Email
 	_, err = conn.Get(u)
 	if err != nil {
-		return &echo.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		}
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	err = bcrypt.CompareHashAndPassword(
 		[]byte(u.Password),
 		[]byte(p.Password),
 	)
 	if err != nil {
-		return helper.MakeHTTPError(http.StatusUnauthorized, errors.New("password: password is not valid"))
+		return helper.MakeHTTPError(http.StatusUnauthorized, "password: password is not valid")
 	}
 
 	return helper.MakeSession(c, u)
@@ -153,7 +147,7 @@ func (el *AuthHandler) POSTRecovery(c echo.Context) error {
 
 	token := StringWithCharset(40, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz")
 	if p.Email == "" {
-		return helper.MakeHTTPError(http.StatusNotAcceptable, errors.New("email is required"))
+		return helper.MakeHTTPError(http.StatusNotAcceptable, "email is required")
 	}
 	u := &model.User{RecoveryToken: token}
 	q := &model.User{Email: p.Email}
@@ -183,7 +177,7 @@ func (el *AuthHandler) POSTReset(c echo.Context) error {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	if p.Token == "-" || p.Token == "" {
-		return helper.MakeHTTPError(http.StatusNotAcceptable, errors.New("token is required"))
+		return helper.MakeHTTPError(http.StatusNotAcceptable, "token is required")
 	}
 	q := &model.User{RecoveryToken: p.Token}
 	u := &model.User{}
@@ -210,7 +204,7 @@ func (el *AuthHandler) POSTReset(c echo.Context) error {
 func (that *AuthHandler) GETSession(c echo.Context) error {
 	_session := c.Get("session")
 	if _session == nil {
-		return echo.NewHTTPError(401, "Unauthorized")
+		return helper.HTTPErrorUnauthorized
 	}
 
 	session := _session.(*model.User)
@@ -223,7 +217,7 @@ func (that *AuthHandler) GETSession(c echo.Context) error {
 	u := &model.User{}
 	_, err = conn.Where("id = ?", session.ID).Get(u)
 	if err != nil {
-		return echo.NewHTTPError(501, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	return c.JSON(200, u)
 }

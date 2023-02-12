@@ -1,4 +1,4 @@
-export interface Data {
+export interface Message {
   id: string
   message: string
   from: number
@@ -8,10 +8,10 @@ export interface Data {
 
 export interface Payload {
   code: string
-  data: Data
+  data: Message
 }
 
-export interface Message {
+export interface MessageEvent {
   type: 'message'
   payload: Payload
 }

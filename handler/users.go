@@ -41,7 +41,7 @@ func (that *UsersHandler) findUsers(c echo.Context) error {
 		Limit(limit, skip).
 		Find(&users)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	return c.JSON(200, users)
 }
@@ -49,7 +49,7 @@ func (that *UsersHandler) findUsers(c echo.Context) error {
 func (that *UsersHandler) findUser(c echo.Context) error {
 	_session := c.Get("session")
 	if _session == nil {
-		return echo.NewHTTPError(401, "Unauthorized")
+		return helper.HTTPErrorUnauthorized
 	}
 
 	conn, err := db.GetConnectionPool()
@@ -60,7 +60,7 @@ func (that *UsersHandler) findUser(c echo.Context) error {
 	u := &model.User{}
 	_, err = conn.SessionWithACL().Where("id = ?", c.Param("user_id")).Get(u)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	return c.JSON(200, u)
 }
@@ -68,18 +68,18 @@ func (that *UsersHandler) findUser(c echo.Context) error {
 func (that *UsersHandler) addUser(c echo.Context) error {
 	u := &model.User{}
 	if err := c.Bind(u); err != nil {
-		return echo.NewHTTPError(406, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusBadRequest, err)
 	}
 	conn, err := db.GetConnectionPool()
 	if err != nil {
-		return echo.NewHTTPError(500, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	if err := u.Check(); err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	if _, err := conn.InsertOne(u); err != nil {
-		return echo.NewHTTPError(500, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	return c.JSON(202, u)
 }
@@ -87,26 +87,26 @@ func (that *UsersHandler) addUser(c echo.Context) error {
 func (that *UsersHandler) updateUser(c echo.Context) error {
 	_session := c.Get("session")
 	if _session == nil {
-		return echo.NewHTTPError(401, "Unauthorized")
+		return helper.HTTPErrorUnauthorized
 	}
 	session := _session.(*model.User)
 	if strconv.Itoa(session.ID) != c.Param("user_id") {
-		return echo.NewHTTPError(401, "Unauthorized")
+		return helper.HTTPErrorUnauthorized
 	}
 	actualUser := &model.User{}
 	updateUser := &model.User{}
 	if err := c.Bind(updateUser); err != nil {
-		return echo.NewHTTPError(406, err.Error())
+		return helper.MakeHTTPError(http.StatusBadRequest, err)
 	}
 	conf := configs.GetConfig()
 	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
 	if err != nil {
-		return echo.NewHTTPError(500, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	_, err = conn.Get(actualUser)
 	if actualUser.ID == 0 || err != nil {
-		return echo.NewHTTPError(401, "unautorized")
+		return helper.HTTPErrorUnauthorized
 	}
 	actualUser.Password = ""
 	actualUser.ValidPassword = ""
@@ -121,10 +121,10 @@ func (that *UsersHandler) updateUser(c echo.Context) error {
 	actualUser.Linkedin = newValueString(updateUser.Linkedin, actualUser.Linkedin)
 
 	if err := actualUser.Check(); err != nil {
-		return echo.NewHTTPError(500, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	if _, err := conn.Where("id = ?", actualUser.ID).Update(actualUser); err != nil {
-		return echo.NewHTTPError(500, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	return c.String(http.StatusNoContent, "")
 }
