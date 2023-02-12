@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
 
-type Result = [string, React.ChangeEventHandler<any>]
+type Result = [
+  string,
+  React.ChangeEventHandler<any>,
+  React.Dispatch<React.SetStateAction<string>>
+]
 
 export default function useFormValue(defaultValue = ''): Result {
   const [value, setValue] = useState(defaultValue)
@@ -9,5 +13,5 @@ export default function useFormValue(defaultValue = ''): Result {
     setValue(evt.target.value)
   }
 
-  return [value, handler]
+  return [value, handler, setValue]
 }

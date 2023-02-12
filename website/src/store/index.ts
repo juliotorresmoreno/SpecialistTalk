@@ -13,19 +13,26 @@ import {
   REGISTER,
   PersistConfig,
 } from 'redux-persist'
+import chatsSlice, { ChatsState } from '../features/chats'
 
 const persistConfig: PersistConfig<any> = {
   key: 'root',
   storage: storage,
-  blacklist: [],
   whitelist: ['auth'],
+  blacklist: [],
 }
 
-export const rootReducers = combineReducers({
+export type RootState = {
+  auth: AuthState
+  chats: ChatsState
+}
+
+export const rootReducers = combineReducers<RootState>({
   auth: authSlice.reducer,
+  chats: chatsSlice.reducer,
 })
 
-const persistedReducer = persistReducer(persistConfig, rootReducers)
+const persistedReducer = persistReducer<RootState>(persistConfig, rootReducers)
 
 export const store = configureStore({
   reducer: persistedReducer,
@@ -39,7 +46,4 @@ export const store = configureStore({
 
 setupListeners(store.dispatch)
 
-export type RootState = {
-  auth: AuthState
-}
 export type AppDispatch = typeof store.dispatch

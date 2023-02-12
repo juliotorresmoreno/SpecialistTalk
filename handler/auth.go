@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
@@ -52,12 +53,17 @@ func (el *AuthHandler) POSTSingUp(c echo.Context) error {
 	u.LastName = p.LastName
 	u.Username = p.Username
 	u.ValidPassword = p.Password
-	u.ACL, err = model.NewACL(p.Username, model.RolUser)
+	u.ACL = &model.ACL{Owner: p.Username}
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusBadRequest, err)
 	}
 
 	if err = u.Check(); err != nil {
+		if strings.Contains(err.Error(), "ValidPassword") {
+			err = errors.New("password: the policy is not followed")
+		} else {
+			err = errors.New(strings.ToLower(err.Error()))
+		}
 		return helper.MakeHTTPError(http.StatusBadRequest, err)
 	}
 

@@ -1,9 +1,9 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Contacts } from './Contacts'
+import Contacts from './Contacts'
 import Provider from './Provider'
 
-const height = '35px'
+const height = 'calc(var(--spacing-v1) * 3.5)'
 const width = '200px'
 
 const Container = styled.div`
@@ -12,7 +12,7 @@ const Container = styled.div`
   height: ${height};
   line-height: ${height};
   user-select: none;
-  background-color: var(--bs-orange);
+  background-color: var(--bs-green);
 
   transform: translateY(calc(100vh - ${height}))
     translateX(calc((100vw - 540px) / 2));

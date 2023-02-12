@@ -6,6 +6,7 @@ import (
 	"unicode"
 
 	"github.com/asaskevich/govalidator"
+	"golang.org/x/exp/slices"
 )
 
 func verifyPassword(s string) (sevenOrMore, number, upper, special bool) {
@@ -46,5 +47,15 @@ func init() {
 		v := fmt.Sprintf("%v", i)
 		sevenOrMore, number, upper, special := verifyPassword(v)
 		return sevenOrMore && number && upper && special
+	})
+
+	govalidator.CustomTypeTagMap.Set("chat_status", func(i, o interface{}) bool {
+		v := fmt.Sprintf("%v", i)
+		elemens := []string{
+			ChatStatusActive,
+			ChatStatusInactive,
+			ChatStatusCreated,
+		}
+		return slices.Contains(elemens, v)
 	})
 }

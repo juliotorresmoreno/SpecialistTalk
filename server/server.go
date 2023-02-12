@@ -25,14 +25,20 @@ func (s *ServerHTTP) Listen() error {
 func NewServer() *ServerHTTP {
 	e := echo.New()
 	svr := &ServerHTTP{e}
+	config := configs.GetConfig()
 
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Skipper: func(c echo.Context) bool {
 			path := c.Request().URL.Path
+			if strings.Contains(path, ".") {
+				return true
+			}
 			return len(path) >= 8 && path[:8] == "/api/v1/"
 		},
 	}))
-	e.Use(middleware.Recover())
+	if config.Env == "production" {
+		e.Use(middleware.Recover())
+	}
 
 	p := prometheus.NewPrometheus("echo", nil)
 	p.Use(e)
@@ -52,13 +58,22 @@ func NewServer() *ServerHTTP {
 	e.Use(middleware.CORS())
 	// e.Use(middleware.CSRF())
 
-	handler.AttachWS(e.Group("/ws", middleware_app.Session))
+	handler.AttachWS(e.Group("/realtime", middleware_app.Session))
 
 	handler.AttachSwaggerApi(e.Group("/docs"))
 
 	api := e.Group("/api/v1", middleware_app.Session)
+
+	if config.Env != "production" {
+		api.Use(middleware_app.TimeSleep(&middleware_app.TimeSleepConfig{
+			Duration: 500 * time.Millisecond,
+		}))
+	}
+
 	handler.AttachAuth(api.Group("/auth"))
 	handler.AttachUsers(api.Group("/users"))
+	handler.AttachChats(api.Group("/chats"))
+	handler.AttachMessages(api.Group("/messages"))
 
 	handler.AttachStatic(e.Group("/*"))
 

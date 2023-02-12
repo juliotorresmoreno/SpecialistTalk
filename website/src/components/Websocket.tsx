@@ -1,0 +1,69 @@
+import React, { useEffect } from 'react'
+import config from '../config'
+import { wsHandlers } from '../handlers'
+import { useAppSelector } from '../store/hooks'
+
+type WebsocketProps = {} & React.PropsWithChildren
+
+const hOpen = wsHandlers.filter((x) => x.event === 'open')
+const hMessage = wsHandlers.filter((x) => x.event === 'message')
+const hError = wsHandlers.filter((x) => x.event === 'error')
+const hClose = wsHandlers.filter((x) => x.event === 'close')
+
+const Websocket: React.FC<WebsocketProps> = ({ children }) => {
+  const session = useAppSelector((state) => state.auth.session)
+  let unmount = false
+  let socket: WebSocket | null = null
+
+  const reconnect = () => {
+    if (socket !== null || !session?.token) return
+    socket = new WebSocket(config.wsUrl + '?token=' + session?.token)
+    socket.addEventListener('open', function (evt) {
+      let _socket = evt.currentTarget as WebSocket
+      if (_socket !== socket) _socket.close()
+
+      hOpen.forEach(({ handler }) => handler())
+    })
+
+    socket.addEventListener('message', function (evt) {
+      let _socket = evt.currentTarget as WebSocket
+      if (_socket !== socket) _socket.close()
+
+      const data = JSON.parse(evt.data)
+
+      hMessage.forEach((h) => {
+        if ((h as any).type === data.type) {
+          h.handler(data)
+        }
+      })
+    })
+
+    socket.addEventListener('error', function (evt) {
+      let _socket = evt.currentTarget as WebSocket
+      if (_socket !== socket) _socket.close()
+
+      hError.forEach(({ handler }) => handler())
+    })
+
+    socket.addEventListener('close', function (evt) {
+      if (unmount) return
+
+      socket = null
+      setTimeout(() => reconnect(), 3000)
+
+      hClose.forEach(({ handler }) => handler())
+    })
+  }
+
+  useEffect(() => {
+    reconnect()
+    return () => {
+      unmount = true
+      socket?.close()
+    }
+  })
+
+  return <>{children}</>
+}
+
+export default Websocket

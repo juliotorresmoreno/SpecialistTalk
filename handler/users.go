@@ -16,11 +16,10 @@ type UsersHandler struct {
 }
 
 func (that *UsersHandler) findUsers(c echo.Context) error {
-	_session := c.Get("session")
-	if _session == nil {
-		return echo.NewHTTPError(401, "Unauthorized")
+	session, err := helper.ValidateSession(c)
+	if session == nil {
+		return err
 	}
-	session := _session.(*model.User)
 
 	conn, err := db.GetConnectionPool()
 	if err != nil {
@@ -42,7 +41,7 @@ func (that *UsersHandler) findUsers(c echo.Context) error {
 		Limit(limit, skip).
 		Find(&users)
 	if err != nil {
-		return echo.NewHTTPError(501, helper.ParseError(err).Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
 	}
 	return c.JSON(200, users)
 }
@@ -52,12 +51,8 @@ func (that *UsersHandler) findUser(c echo.Context) error {
 	if _session == nil {
 		return echo.NewHTTPError(401, "Unauthorized")
 	}
-	session := _session.(*model.User)
-	if !session.ACL.IsAdmin() && strconv.Itoa(session.ID) != c.Param("user_id") {
-		return echo.NewHTTPError(401, "Unauthorized")
-	}
-	conf := configs.GetConfig()
-	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
+
+	conn, err := db.GetConnectionPool()
 	if err != nil {
 		return err
 	}
@@ -65,7 +60,7 @@ func (that *UsersHandler) findUser(c echo.Context) error {
 	u := &model.User{}
 	_, err = conn.SessionWithACL().Where("id = ?", c.Param("user_id")).Get(u)
 	if err != nil {
-		return echo.NewHTTPError(501, helper.ParseError(err).Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
 	}
 	return c.JSON(200, u)
 }
@@ -95,7 +90,7 @@ func (that *UsersHandler) updateUser(c echo.Context) error {
 		return echo.NewHTTPError(401, "Unauthorized")
 	}
 	session := _session.(*model.User)
-	if !session.ACL.IsAdmin() && strconv.Itoa(session.ID) != c.Param("user_id") {
+	if strconv.Itoa(session.ID) != c.Param("user_id") {
 		return echo.NewHTTPError(401, "Unauthorized")
 	}
 	actualUser := &model.User{}

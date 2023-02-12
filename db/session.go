@@ -55,10 +55,7 @@ func (e *Session) Insert(bean ...interface{}) (int64, error) {
 		}
 		field = field.Elem().FieldByName("ACL")
 		if field.CanSet() && field.Type() == aclType {
-			acl, err := model.NewACL(e.user.Username, e.user.ACL.Group)
-			if err != nil {
-				return 0, err
-			}
+			acl := &model.ACL{Owner: e.user.Username}
 			field.Set(reflect.ValueOf(acl))
 		}
 	}
@@ -73,10 +70,7 @@ func (e *Session) InsertOne(bean interface{}) (int64, error) {
 	}
 	field = field.Elem().FieldByName("ACL")
 	if field.CanSet() && field.Type() == aclType && field.IsZero() {
-		acl, err := model.NewACL(e.user.Username, e.user.ACL.Group)
-		if err != nil {
-			return 0, err
-		}
+		acl := &model.ACL{Owner: e.user.Username}
 		field.Set(reflect.ValueOf(acl))
 	}
 	return e.Session.InsertOne(bean)

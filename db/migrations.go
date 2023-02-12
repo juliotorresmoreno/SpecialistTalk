@@ -16,7 +16,7 @@ func Migrate() {
 	}
 	defer conn.Close()
 
-	err = conn.Sync2(model.User{})
+	err = conn.Sync2(&model.User{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +24,11 @@ func Migrate() {
 	_, _ = conn.Query("CREATE INDEX \"IDX_users_name\" ON public.users USING GIN (name);")
 	_, _ = conn.Query("CREATE INDEX \"IDX_users_lastname\" ON public.users USING GIN (lastname);")
 
-	err = conn.Sync2(model.Chat{})
+	err = conn.Sync2(&model.Chat{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = conn.Sync2(&model.Group{})
 	if err != nil {
 		log.Fatal(err)
 	}

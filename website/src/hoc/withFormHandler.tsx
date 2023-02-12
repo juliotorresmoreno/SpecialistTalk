@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Session } from '../models/session'
+import { useApi } from '../services/api'
 
 type Errors = {
   [x: string]: string
@@ -16,38 +17,19 @@ export default function withFormHandler<T = any>(
   url: string
 ) {
   return function WithFormHandler({ onSuccess }: WithFormHandlerProps) {
-    const [errors, setErrors] = useState<Errors>({})
-    const [isLoading, setIsLoading] = useState(false)
-    const onSubmit = async (payload: any) => {
+    const { error, isLoading, apply } = useApi<T, Session>(method, url)
+
+    const onSubmit = async (payload: T) => {
       try {
-        setIsLoading(true)
-        const response = await fetch(url, {
-          method,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        })
-        setIsLoading(false)
-        const body = await response.json()
-        if (!response.ok) {
-          const [key, value] = body.message.split(':')
-          if (value !== undefined) {
-            setErrors({ [key.toLowerCase()]: value })
-          } else {
-            setErrors({ message: key })
-          }
-          return
-        }
-        onSuccess && onSuccess(body)
-      } catch (error: any) {
-        if ('message' in error) setErrors({ message: error.message })
-      }
+        const response = await apply(payload)
+
+        onSuccess && onSuccess(response)
+      } catch (error: any) {}
     }
     const config: any = {
       isLoading,
       onSubmit,
-      errors,
+      errors: error ?? {},
     }
     return <WrappedComponent {...config} />
   }

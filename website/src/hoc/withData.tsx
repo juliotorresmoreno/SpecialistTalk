@@ -1,33 +1,31 @@
 import React, { useEffect, useState } from 'react'
 import Loading from '../components/Loading'
-import { useGetSession } from '../services/auth'
-import { useAppSelector } from '../store/hooks'
+import ErrorPage from '../pages/ErrorPage'
+import { useGetData } from '../services/api'
 
 type ResultProps = {
   [x: string | number | symbol]: any
 } & React.PropsWithChildren
 
-const withSession = function <T = any>(
-  WrappedComponent: React.ComponentType<any>
+const withData = function <T = any>(
+  WrappedComponent: React.ComponentType<any>,
+  url: string
 ) {
   const result: React.FC<T & ResultProps> = (props) => {
-    const session = useAppSelector((state) => state.auth.session)
     const [data, setData] = useState<any>(null)
-    const { isLoading, get } = useGetSession()
+    const { get, error, isLoading } = useGetData(url)
 
     useEffect(() => {
-      if (!session) return
       if (isLoading) return
       if (data) return
       get().then(setData)
     }, [isLoading])
 
-    if (isLoading) return <Loading />
-
-    return <WrappedComponent {...props} />
+    if (error) return <ErrorPage error={error} />
+    if (!data || isLoading) return <Loading />
+    return <WrappedComponent payload={data} {...props} />
   }
-
   return result
 }
 
-export default withSession
+export default withData

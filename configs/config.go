@@ -12,6 +12,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type MongoDB struct {
+	DSN          string `json:"dsn"          yaml:"dsn"`
+	MaxOpenConns int    `json:"maxOpenConns" yaml:"maxOpenConns"`
+	MaxIdleConns int    `json:"maxIdleConns" yaml:"maxIdleConns"`
+}
+
 type Database struct {
 	Driver       string `json:"driver"       yaml:"driver"`
 	DSN          string `json:"dsn"          yaml:"dsn"`
@@ -26,6 +32,11 @@ type Redis struct {
 	PoolSize int    `json:"poolSize" yaml:"poolSize"`
 }
 
+type Mongo struct {
+	DSN      string `json:"dsn"      yaml:"dsn"`
+	Database string `json:"database" yaml:"database"`
+}
+
 // Config s
 type Config struct {
 	Env             string    `json:"env"             yaml:"env"`
@@ -36,11 +47,13 @@ type Config struct {
 	WriteBufferSize int       `json:"writeBufferSize" yaml:"writeBufferSize"`
 	Database        *Database `json:"database"        yaml:"database"`
 	Redis           *Redis    `json:"redis"           yaml:"redis"`
+	Mongo           *Mongo    `json:"mongo"           yaml:"mongo"`
 }
 
 var conf Config = Config{
 	Database:        &Database{},
 	Redis:           &Redis{},
+	Mongo:           &Mongo{},
 	ReadBufferSize:  0,
 	WriteBufferSize: 0,
 }
@@ -108,12 +121,15 @@ func init() {
 	conf.Redis.Addr = fromEnvfString(conf.Redis.Addr, "REDIS_ADDR", "localhost:6379")
 	conf.Redis.DB = fromEnvfInt(conf.Redis.DB, "REDIS_DB", 0)
 	conf.Redis.Password = fromEnvfString(conf.Redis.Password, "REDIS_PWD", "")
-	conf.Redis.PoolSize = fromEnvfInt(conf.Redis.PoolSize, "POOL_SIZE", 50)
+	conf.Redis.PoolSize = fromEnvfInt(conf.Redis.PoolSize, "REDIS_POOL_SIZE", 50)
 
 	conf.Database.DSN = fromEnvfString(conf.Database.DSN, "DATABASE_DSN", "")
 	conf.Database.Driver = fromEnvfString(conf.Database.Driver, "DATABASE_DRIVER", "")
-	conf.Database.MaxOpenConns = fromEnvfInt(conf.Redis.DB, "MAX_OPEN_CONNS", 50)
-	conf.Database.MaxIdleConns = fromEnvfInt(conf.Redis.DB, "MAX_IDLE_CONNS", 5)
+	conf.Database.MaxOpenConns = fromEnvfInt(conf.Redis.DB, "DATABASE_MAX_OPEN_CONNS", 50)
+	conf.Database.MaxIdleConns = fromEnvfInt(conf.Redis.DB, "DATABASE_MAX_IDLE_CONNS", 5)
+
+	conf.Mongo.DSN = fromEnvfString(conf.Mongo.DSN, "MONGO_DSN", "")
+	conf.Mongo.Database = fromEnvfString(conf.Mongo.Database, "MONGO_DATABASE", "")
 }
 
 // GetConfig s

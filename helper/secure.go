@@ -92,8 +92,14 @@ type Session struct {
 	Token string      `json:"token"`
 }
 
-func MakeSession(c echo.Context, u *model.User) error {
+func GenerateToken() string {
 	token := bson.NewObjectId().Hex()
+
+	return token
+}
+
+func MakeSession(c echo.Context, u *model.User) error {
+	token := GenerateToken()
 	redisCli := services.GetPoolRedis()
 	redisCli.Set(token, u.ID, 24*time.Hour)
 
