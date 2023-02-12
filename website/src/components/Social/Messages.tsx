@@ -3,8 +3,10 @@ import { useParams } from 'react-router'
 import styled from 'styled-components'
 import useFormValue from '../../hooks/useFormValue'
 import { useAdd } from '../../services/messages'
+import { useAppSelector } from '../../store/hooks'
 import Button from '../Button'
 import _Input from '../Input'
+import Message from './Message'
 
 const Container = styled.div`
   background-color: white;
@@ -14,9 +16,9 @@ const Container = styled.div`
 `
 
 const Content = styled.div`
-  background-color: blue;
-  display: flex;
-  flex: 1;
+  padding: var(--spacing-v1);
+  overflow-y: scroll;
+  height: calc(100vh - 163px);
 `
 
 const InputContainer = styled.div`
@@ -33,19 +35,27 @@ const Input = styled(_Input)`
 export const Messages = () => {
   const { isLoading, error, add } = useAdd()
   const [message, handlerMessage, setMessage] = useFormValue('')
-  const { id } = useParams()
+  const id = useParams().id as string
+  const notifications = useAppSelector((state) => state.messages.notifications)
   const onKeyUp: React.KeyboardEventHandler<HTMLInputElement> = (evt) => {
     if (evt.key !== 'Enter') return
+    setMessage('')
 
     add({
       code: id as string,
       message,
-    }).then(() => setMessage(''))
+    })
   }
+
+  const messages = notifications[id] ?? []
 
   return (
     <Container>
-      <Content>Messages</Content>
+      <Content>
+        {messages.map((message, key) => (
+          <Message key={'message' + key} data={message} />
+        ))}
+      </Content>
       <InputContainer>
         <Input onChange={handlerMessage} onKeyUp={onKeyUp} value={message} />
         <Button>

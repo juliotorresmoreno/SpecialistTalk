@@ -6,30 +6,35 @@ import Floating from './Floating'
 
 const Container = styled.div`
   display: flex;
-  flex: 1;
+  user-select: none;
 `
 
 const ToggleButton = styled.div`
+  height: calc(var(--spacing-v1) * 3.5);
   cursor: pointer;
-  flex: 1;
   text-align: center;
+  flex: 1;
+  color: white;
+  background-color: var(--bs-primary);
+  display: flex;
+  place-items: center;
+  place-content: center;
 `
 
 const FloatingContainer = styled.div`
   display: flex;
-  flex: 1;
   flex-direction: column;
   position: absolute;
   height: calc(100vh - 106px);
-  width: 100%;
+  width: 200px;
   transform: translateY(-100%);
-  background-color: var(--bs-gray-200);
+  background-color: var(--bs-white);
 `
 
 type ContactsProps = {}
 
 const Contacts: React.FC<ContactsProps> = () => {
-  const [isOpen, toggle] = useToggle(true)
+  const [isOpen, toggle] = useToggle(false)
   const { setActiveChat } = useContext(Context)
 
   const onToggle = () => {

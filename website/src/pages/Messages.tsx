@@ -1,3 +1,4 @@
+import moment from 'moment'
 import React from 'react'
 import Header from '../components/Header'
 import { Messages } from '../components/Social/Messages'
@@ -34,11 +35,14 @@ const MessagesPage = withDataById<any, IChat>(
   _MessagesPage,
   url,
   function (data) {
-    console.log(data)
     store.dispatch(
       addNotification({
-        username: data.user.username,
-        messages: data.messages,
+        code: data.code,
+        messages: data.messages.sort((x, y) => {
+          const x1 = moment(x.created_at).unix()
+          const y1 = moment(y.created_at).unix()
+          return x1 > y1 ? 1 : -1
+        }),
       })
     )
   }
