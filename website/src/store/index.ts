@@ -14,6 +14,7 @@ import {
   PersistConfig,
 } from 'redux-persist'
 import chatsSlice, { ChatsState } from '../features/chats'
+import messagesSlice, { MessagesState } from '../features/messages'
 
 const persistConfig: PersistConfig<any> = {
   key: 'root',
@@ -25,11 +26,13 @@ const persistConfig: PersistConfig<any> = {
 export type RootState = {
   auth: AuthState
   chats: ChatsState
+  messages: MessagesState
 }
 
 export const rootReducers = combineReducers<RootState>({
   auth: authSlice.reducer,
   chats: chatsSlice.reducer,
+  messages: messagesSlice.reducer,
 })
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducers)

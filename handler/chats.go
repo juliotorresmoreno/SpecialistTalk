@@ -35,12 +35,12 @@ func (that *ChatsHandler) get(c echo.Context) error {
 	conf := configs.GetConfig()
 	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	chat := &model.Chat{Code: code}
 	if ok, err := conn.Get(chat); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	} else if !ok {
 		return helper.HTTPErrorUnauthorized
 	}
@@ -62,9 +62,18 @@ func (that *ChatsHandler) get(c echo.Context) error {
 	_ = curr.All(context.Background(), &messages)
 	helper.Reverse(messages)
 
+	if conn, err = db.GetConnectionPool(); err != nil {
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
+	}
+
+	user := &model.User{ID: chat.UserID}
+	if _, err = conn.Get(user); err != nil {
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
+	}
+
 	return c.JSON(200, map[string]interface{}{
 		"id":       chat.ID,
-		"user_id":  chat.UserID,
+		"user":     user,
 		"name":     chat.Name,
 		"code":     chat.Code,
 		"status":   chat.Status,
@@ -81,13 +90,13 @@ func (that *ChatsHandler) find(c echo.Context) error {
 	conf := configs.GetConfig()
 	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	chats := make([]model.Chat, 0)
 	err = conn.Find(&chats)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(200, chats)
@@ -110,13 +119,13 @@ func (that *ChatsHandler) add(c echo.Context) error {
 
 	conn, err := db.GetConnectionPool()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	u := &model.User{}
 	ok, err := conn.Where("id = ?", payload.UserID).Get(u)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	if !ok {
 		return helper.HTTPErrorNotFound
@@ -125,13 +134,13 @@ func (that *ChatsHandler) add(c echo.Context) error {
 	conf := configs.GetConfig()
 	conn, err = db.GetConnectionPoolWithSession(conf.Database, session)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	chat := &model.Chat{UserID: u.ID}
 	ok, err = conn.Get(chat)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	if !ok {
 		token := helper.GenerateToken()
@@ -140,7 +149,7 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		chat.ACL = &model.ACL{Owner: session.Username}
 		chat.Status = model.ChatStatusActive
 		if err = chat.Check(); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+			return helper.MakeHTTPError(http.StatusInternalServerError, err)
 		}
 		_, _ = conn.InsertOne(chat)
 
@@ -150,7 +159,7 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		chat2.ACL = &model.ACL{Owner: u.Username}
 		chat2.Status = model.ChatStatusCreated
 		if err = chat.Check(); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, helper.ParseError(err).Error())
+			return helper.MakeHTTPError(http.StatusInternalServerError, err)
 		}
 		_, _ = conn.InsertOne(chat2)
 	}
@@ -166,5 +175,5 @@ func (that *ChatsHandler) add(c echo.Context) error {
 }
 
 func (that *ChatsHandler) update(c echo.Context) error {
-	return nil
+	return helper.HTTPErrorNotImplementedError
 }

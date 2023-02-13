@@ -27,8 +27,8 @@ const SignInForm: React.FC<SignInFormProps> = ({
   errors = {},
   isLoading = false,
 }) => {
-  const [email, setEmail] = useFormValue()
-  const [password, setPassword] = useFormValue()
+  const [email, setEmail] = useFormValue('')
+  const [password, setPassword] = useFormValue('')
   const defaultSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault()
 

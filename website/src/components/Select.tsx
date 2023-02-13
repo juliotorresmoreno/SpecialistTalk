@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 
-const Input = styled.input.attrs({ placeholder: 'Type here' })`
+const Select = styled.select`
+  height: calc(var(--spacing-v1) * 3.5);
   border-radius: 0;
   box-shadow: none;
   border: none;
@@ -26,4 +27,4 @@ const Input = styled.input.attrs({ placeholder: 'Type here' })`
   }
 `
 
-export default Input
+export default Select

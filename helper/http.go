@@ -26,7 +26,7 @@ func Paginate(c echo.Context) (int, int) {
 func ValidateSession(c echo.Context) (*model.User, error) {
 	session := c.Get("session")
 	if session == nil {
-		return nil, echo.NewHTTPError(401, "unauthorized")
+		return nil, HTTPErrorUnauthorized
 	}
 	return session.(*model.User), nil
 }
@@ -39,10 +39,7 @@ func GetPayload(c echo.Context, payload interface{}) (*model.User, error) {
 
 	kindOfJ := reflect.ValueOf(payload).Kind()
 	if kindOfJ != reflect.Ptr {
-		return session, &echo.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: "payload must a pointer",
-		}
+		return session, echo.NewHTTPError(http.StatusInternalServerError, "payload must a pointer")
 	}
 
 	err = c.Bind(payload)

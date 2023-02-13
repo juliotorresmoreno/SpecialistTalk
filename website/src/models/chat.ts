@@ -1,3 +1,4 @@
+import { Message } from './message'
 import { IUser } from './user'
 
 export type IChat = {
@@ -5,10 +6,5 @@ export type IChat = {
   name: string
   code: string
   user: IUser
-}
-
-export type IChatWithUser = {
-  name: string
-  code: string
-  user: IUser
+  messages: Message[]
 }

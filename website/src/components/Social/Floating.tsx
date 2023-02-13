@@ -29,7 +29,9 @@ const Contact = styled.div<ContactProps>`
   color: ${({ notification }) => (notification ? 'var(--bs-orange)' : 'black')};
 `
 
-const InputSearch = Input
+const InputSearch = styled(Input)`
+  height: calc(var(--spacing-v1) * 3.5);
+`
 
 type _FloatingProps = {
   payload: IChat[]

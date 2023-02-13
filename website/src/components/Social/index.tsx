@@ -12,7 +12,7 @@ const Container = styled.div`
   height: ${height};
   line-height: ${height};
   user-select: none;
-  background-color: var(--bs-green);
+  background-color: var(--bs-teal);
 
   transform: translateY(calc(100vh - ${height}))
     translateX(calc((100vw - 540px) / 2));

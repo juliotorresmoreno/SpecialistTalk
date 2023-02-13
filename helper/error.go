@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -10,25 +9,36 @@ import (
 )
 
 // ParseError s
-func ParseError(err error) error {
-	v := err.Error()
+func ParseError(err interface{}) string {
+	v := ""
+	switch result := err.(type) {
+	case []byte:
+		v = string(result)
+	case string:
+		v = result
+	case error:
+		v = result.Error()
+	default:
+		v = fmt.Sprintf("%v", err)
+	}
+
 	if len(v) >= 17 && v[:17] == "pq: duplicate key" {
 		s := strings.Split(v, "\"")
 		s = strings.Split(s[1], "_")
 		f := strings.Join(s[2:], "_")
-		return fmt.Errorf("%v: %v already exists", f, f)
+		return fmt.Sprintf("%v: %v already exists", f, f)
 	}
 	if len(v) >= 8 && v[:8] == "dial tcp" {
-		return errors.New("database is not running")
+		return "database is not running"
 	}
-	errString := strings.ToLower(err.Error())
-	return errors.New(errString)
+
+	return strings.ToLower(v)
 }
 
-func MakeHTTPError(status int, err error) *echo.HTTPError {
+func MakeHTTPError(status int, err interface{}) *echo.HTTPError {
 	return &echo.HTTPError{
 		Code:    status,
-		Message: err.Error(),
+		Message: ParseError(err),
 	}
 }
 

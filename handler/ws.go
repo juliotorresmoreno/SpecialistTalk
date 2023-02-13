@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/juliotorresmoreno/SpecialistTalk/db"
+	"github.com/juliotorresmoreno/SpecialistTalk/helper"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/labstack/echo/v4"
 )
@@ -63,7 +64,7 @@ func (u *HandlerWS) GET(c echo.Context) error {
 			Type:    string(model.NotificationError),
 			Payload: "Unauthorized",
 		})
-		return echo.NewHTTPError(401, "Unauthorized")
+		return helper.HTTPErrorUnauthorized
 	}
 	session := _session.(*model.User)
 
