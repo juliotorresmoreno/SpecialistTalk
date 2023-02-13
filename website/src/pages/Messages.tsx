@@ -1,12 +1,18 @@
 import moment from 'moment'
 import React from 'react'
+import styled from 'styled-components'
 import Header from '../components/Header'
-import { Messages } from '../components/Social/Messages'
+import Actions from '../components/Social/Actions'
+import Messages from '../components/Social/Messages'
 import config from '../config'
 import messagesSlice from '../features/messages'
 import withDataById from '../hoc/withDataById'
 import { IChat } from '../models/chat'
 import { store } from '../store'
+
+const HeaderContainer = styled.div`
+  display: flex;
+`
 
 type _MessagesPageProps = {
   data: IChat
@@ -15,12 +21,15 @@ type _MessagesPageProps = {
 const _MessagesPage: React.FC<_MessagesPageProps> = ({ data }) => {
   const header = {
     title: data.name,
-    description: 'programa de super poderes',
+    description: '',
   }
 
   return (
     <>
-      <Header {...header} />
+      <HeaderContainer>
+        <Header {...header} />
+        <Actions />
+      </HeaderContainer>
       <main>
         <Messages />
       </main>
@@ -31,21 +40,26 @@ const _MessagesPage: React.FC<_MessagesPageProps> = ({ data }) => {
 const addNotification = messagesSlice.actions.addNotification
 
 const url = config.baseUrl + '/chats'
-const MessagesPage = withDataById<any, IChat>(
-  _MessagesPage,
+const MessagesPage = withDataById<any, IChat>({
+  WrappedComponent: _MessagesPage,
   url,
-  function (data) {
+  skipper(id) {
+    const notifications = store.getState().messages.notifications
+    return notifications[id] ?? null
+  },
+  callback(data) {
+    data.messages = data.messages.sort((x, y) => {
+      const x1 = moment(x.created_at).unix()
+      const y1 = moment(y.created_at).unix()
+      return x1 > y1 ? 1 : -1
+    })
     store.dispatch(
       addNotification({
         code: data.code,
-        messages: data.messages.sort((x, y) => {
-          const x1 = moment(x.created_at).unix()
-          const y1 = moment(y.created_at).unix()
-          return x1 > y1 ? 1 : -1
-        }),
+        chat: data,
       })
     )
-  }
-)
+  },
+})
 
 export default MessagesPage

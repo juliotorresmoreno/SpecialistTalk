@@ -19,12 +19,14 @@ const handlers = new HandlerManager(
       const code = data.payload.code
       const user = state.auth.session?.user
       const message = data.payload.data
-      let messages = state.messages.notifications[code] || []
-      messages = [...messages, message]
+      const chat = state.messages.notifications[code]
+      const nchat = { ...chat }
+      const messages = state.messages.notifications[code]?.messages || []
+      nchat.messages = [...messages, message]
       store.dispatch(
         messagesSlice.actions.addNotification({
           code,
-          messages,
+          chat: nchat,
         })
       )
       if (data.payload.data.from != user?.id) {

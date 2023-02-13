@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Message } from '../models/message'
+import { IChat } from '../models/chat'
 
 export type MessagesState = {
-  notifications: { [x: string]: Message[] }
+  notifications: { [x: string]: IChat }
 }
 
 const initialState: MessagesState = {
@@ -11,7 +11,7 @@ const initialState: MessagesState = {
 
 type addNotificationPayload = {
   code: string
-  messages: Message[]
+  chat: IChat
 }
 
 const messagesSlice = createSlice({
@@ -19,7 +19,7 @@ const messagesSlice = createSlice({
   initialState,
   reducers: {
     addNotification(state, { payload }: PayloadAction<addNotificationPayload>) {
-      state.notifications[payload.code] = payload.messages
+      state.notifications[payload.code] = payload.chat
     },
   },
 })

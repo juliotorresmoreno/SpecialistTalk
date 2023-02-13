@@ -8,11 +8,13 @@ type MessageProps = {
   data: _Message
 }
 
-type ContainerProps = {
+type WithMe = {
   isMe: boolean
 }
-const Container = styled.div<ContainerProps>`
-  text-align: ${(props) => (props.isMe ? 'end' : 'start')};
+const Container = styled.div<WithMe>`
+  display: flex;
+  justify-content: ${(props) => (props.isMe ? 'start' : 'end')};
+  margin-bottom: var(--spacing-v1);
 `
 
 const DateContainer = styled.div`
@@ -24,23 +26,33 @@ const ContainerName = styled.span`
   font-weight: bold;
 `
 
+const Bubble = styled.div<WithMe>`
+  background-color: var(--bs-gray-200);
+  flex: 0.8;
+  border-radius: 5px;
+  padding: var(--spacing-v1);
+  text-align: ${(props) => (props.isMe ? 'start' : 'end')};
+`
+
 const Message: React.FC<MessageProps> = ({ data }) => {
   const user = useAppSelector((state) => state.auth.session?.user)
   const date = moment(data.created_at).format('MMMM Do YYYY, h:mm:ss a')
   const isMe = user?.id === data.from
   const message = isMe ? (
     <>
-      {data.message}: <ContainerName>{data.from_name}</ContainerName>
+      <ContainerName>{data.from_name}</ContainerName>: {data.message}
     </>
   ) : (
     <>
-      <ContainerName>{data.from_name}</ContainerName>: {data.message}
+      {data.message}: <ContainerName>{data.from_name}</ContainerName>
     </>
   )
   return (
     <Container isMe={isMe}>
-      <div>{message}</div>
-      <DateContainer>{date}</DateContainer>
+      <Bubble isMe={isMe}>
+        <div>{message}</div>
+        <DateContainer>{date}</DateContainer>
+      </Bubble>
     </Container>
   )
 }
