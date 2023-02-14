@@ -69,6 +69,8 @@ const Messages = () => {
 
   const messages = notifications[id]?.messages ?? []
 
+  const onEmojiSelect = (emoji: string) => console.log(emoji)
+
   return (
     <Container>
       <Content ref={contentRef}>
@@ -77,7 +79,7 @@ const Messages = () => {
         ))}
       </Content>
       <InputContainer>
-        <Emoji />
+        <Emoji onSelect={onEmojiSelect} />
         <Input onChange={handlerMessage} onKeyUp={onKeyUp} value={message} />
         <Button onClick={onSend}>
           <span className="material-symbols-outlined">send</span>
