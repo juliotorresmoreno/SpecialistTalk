@@ -4,8 +4,8 @@ const notAction: React.MouseEventHandler<HTMLAnchorElement> = (evt) =>
   evt.preventDefault()
 
 const Anchor = styled.a.attrs((props) => ({
-  onClick: notAction,
   ...props,
+  onClick: props.onClick ?? notAction,
 }))`
   color: var(--bs-gray-700);
   cursor: pointer;

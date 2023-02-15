@@ -37,6 +37,10 @@ type Mongo struct {
 	Database string `json:"database" yaml:"database"`
 }
 
+type ChatGPT3 struct {
+	ApiKey string `json:"api_key" yaml:"api_key"`
+}
+
 // Config s
 type Config struct {
 	Env             string    `json:"env"             yaml:"env"`
@@ -48,12 +52,14 @@ type Config struct {
 	Database        *Database `json:"database"        yaml:"database"`
 	Redis           *Redis    `json:"redis"           yaml:"redis"`
 	Mongo           *Mongo    `json:"mongo"           yaml:"mongo"`
+	ChatGPT3        *ChatGPT3 `json:"chat_gpt"        yaml:"chat_gpt"`
 }
 
 var conf Config = Config{
 	Database:        &Database{},
 	Redis:           &Redis{},
 	Mongo:           &Mongo{},
+	ChatGPT3:        &ChatGPT3{},
 	ReadBufferSize:  0,
 	WriteBufferSize: 0,
 }
@@ -130,6 +136,8 @@ func init() {
 
 	conf.Mongo.DSN = fromEnvfString(conf.Mongo.DSN, "MONGO_DSN", "")
 	conf.Mongo.Database = fromEnvfString(conf.Mongo.Database, "MONGO_DATABASE", "")
+
+	conf.ChatGPT3.ApiKey = fromEnvfString(conf.ChatGPT3.ApiKey, "CHATGPT3_API_KEY", "")
 }
 
 // GetConfig s

@@ -1,12 +1,14 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import { useParams } from 'react-router'
 import styled from 'styled-components'
+import SocialContext from './SocialContext'
 import { useAdd } from '../../services/messages'
 import { useAppSelector } from '../../store/hooks'
 import Button from '../Button'
 import Emoji from '../Emoji'
 import _Input from '../Input'
 import Message from './Message'
+import Anchor from '../Anchor'
 
 const Container = styled.div`
   background-color: white;
@@ -32,7 +34,19 @@ const Input = styled(_Input)`
   height: calc(var(--spacing-v1) * 3.5);
 `
 
+const AttachmentContainer = styled.div`
+  //gap: var(--spacing-v1);
+  margin-bottom: var(--spacing-v1);
+  //display: flex;
+`
+
+const Attachment = styled.div`
+  display: inline-block;
+  margin-right: var(--spacing-v1); ;
+`
+
 const Messages = () => {
+  const { attachments, setAttachments } = useContext(SocialContext)
   const contentRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const { isLoading, error, add } = useAdd()
@@ -47,8 +61,10 @@ const Messages = () => {
     add({
       code: id as string,
       message,
+      attachments: attachments.map(({ name, body = '' }) => ({ name, body })),
     })
     current.value = ''
+    setAttachments([])
   }
   const onSend: React.MouseEventHandler<HTMLButtonElement> = (evt) => {
     const current = inputRef.current
@@ -97,6 +113,18 @@ const Messages = () => {
         {messages.map((message, key) => (
           <Message key={'message-' + key} data={message} />
         ))}
+        <AttachmentContainer>
+          {attachments.map((x, key) => (
+            <Anchor
+              key={'attachment-' + key}
+              href={x.url}
+              download={x.name}
+              onClick={() => {}}
+            >
+              <Attachment>{x.name}</Attachment>
+            </Anchor>
+          ))}
+        </AttachmentContainer>
       </Content>
       <InputContainer>
         <Emoji onSelect={onEmojiSelect} />
