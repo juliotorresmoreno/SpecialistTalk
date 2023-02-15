@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { useParams } from 'react-router'
 import styled from 'styled-components'
-import useFormValue from '../../hooks/useFormValue'
 import { useAdd } from '../../services/messages'
 import { useAppSelector } from '../../store/hooks'
 import Button from '../Button'
@@ -35,22 +34,28 @@ const Input = styled(_Input)`
 
 const Messages = () => {
   const contentRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const { isLoading, error, add } = useAdd()
-  const [message, handlerMessage, setMessage] = useFormValue('')
   const id = useParams().id as string
   const notifications = useAppSelector((state) => state.messages.notifications)
   const onKeyUp: React.KeyboardEventHandler<HTMLInputElement> = (evt) => {
+    const current = inputRef.current
     if (evt.key !== 'Enter') return
-    setMessage('')
+    if (!current) return
 
+    const message = current.value
     add({
       code: id as string,
       message,
     })
+    current.value = ''
   }
   const onSend: React.MouseEventHandler<HTMLButtonElement> = (evt) => {
-    setMessage('')
+    const current = inputRef.current
+    if (!current) return
 
+    const message = current.value
+    current.value = ''
     add({
       code: id as string,
       message,
@@ -69,18 +74,33 @@ const Messages = () => {
 
   const messages = notifications[id]?.messages ?? []
 
-  const onEmojiSelect = (emoji: string) => console.log(emoji)
+  const onEmojiSelect = (emoji: string) => {
+    const current = inputRef.current
+    if (!current) return
+
+    const message = current.value
+    const selectionStart = current.selectionStart ?? 0
+    const selectionEnd = current.selectionEnd ?? 0
+
+    current.value =
+      message.substring(0, selectionStart) +
+      emoji +
+      message.substring(selectionEnd)
+
+    current.setSelectionRange(selectionStart + 2, selectionStart + 2)
+    current.focus()
+  }
 
   return (
     <Container>
       <Content ref={contentRef}>
         {messages.map((message, key) => (
-          <Message key={'message' + key} data={message} />
+          <Message key={'message-' + key} data={message} />
         ))}
       </Content>
       <InputContainer>
         <Emoji onSelect={onEmojiSelect} />
-        <Input onChange={handlerMessage} onKeyUp={onKeyUp} value={message} />
+        <Input ref={inputRef} onKeyUp={onKeyUp} />
         <Button onClick={onSend}>
           <span className="material-symbols-outlined">send</span>
         </Button>
