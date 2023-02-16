@@ -43,13 +43,14 @@ type ChatGPT3 struct {
 }
 
 type Minio struct {
+	Url             string `json:"url"               yaml:"url"`
 	Endpoint        string `json:"endpoint"          yaml:"endpoint"`
 	AccessKeyID     string `json:"access_key_id"     yaml:"access_key_id"`
 	SecretAccessKey string `json:"secret_access_key" yaml:"secret_access_key"`
 	UseSSL          bool   `json:"use_ssl"           yaml:"use_ssl"`
+	Bucket          string `json:"bucket"            yaml:"bucket"`
 }
 
-// Config s
 type Config struct {
 	Env             string    `json:"env"               yaml:"env"`
 	Secret          string    `json:"secret"            yaml:"secret"`
@@ -74,37 +75,46 @@ var conf Config = Config{
 	WriteBufferSize: 0,
 }
 
-func fromEnvfBool(zero string, some bool) bool {
-	val := os.Getenv(zero)
-	if val != "" {
-		return strings.ToLower(val) == "true"
-	}
-	return some
+type Parser struct {
+	prefix string
 }
 
-func fromEnvfString(value string, zero string, some string) string {
-	val := os.Getenv(zero)
-	if val != "" {
-		return val
-	}
-	if value != "" {
-		return value
-	}
-	return some
+func (p *Parser) SetPrefix(prefix string) {
+	p.prefix = prefix
 }
 
-func fromEnvfInt(value int, zero string, some int) int {
-	val := os.Getenv(zero)
+func (p *Parser) Bool(value *bool, zero string, some bool) {
+	val := os.Getenv(p.prefix + zero)
+	if val != "" {
+		*value = strings.ToLower(val) == "true"
+		return
+	}
+	*value = some
+}
+
+func (p *Parser) String(value *string, zero string, some string) {
+	val := os.Getenv(p.prefix + zero)
+	if val != "" {
+		*value = val
+		return
+	}
+	if *value == "" {
+		*value = some
+	}
+}
+
+func (p *Parser) Int(value *int, zero string, some int) {
+	val := os.Getenv(p.prefix + zero)
 	if val != "" {
 		v, err := strconv.Atoi(val)
 		if err == nil {
-			return v
+			*value = v
+			return
 		}
 	}
-	if value != 0 {
-		return value
+	if *value == 0 {
+		*value = some
 	}
-	return some
 }
 
 var configPath string = ""
@@ -135,35 +145,48 @@ func init() {
 
 	_ = godotenv.Load()
 
-	conf.Host = fromEnvfString(conf.Host, "HOST", "")
-	conf.Port = fromEnvfString(conf.Port, "PORT", "1323")
-	conf.Secret = fromEnvfString(conf.Secret, "SECRET", "123456")
-	conf.Env = fromEnvfString(conf.Env, "ENV", "development")
-	conf.ReadBufferSize = fromEnvfInt(conf.ReadBufferSize, "READ_BUFFER_SIZE", 2048)
-	conf.WriteBufferSize = fromEnvfInt(conf.WriteBufferSize, "WRITE_BUFFER_SIZE", 2048)
+	p := &Parser{}
 
-	conf.Redis.Addr = fromEnvfString(conf.Redis.Addr, "REDIS_ADDR", "localhost:6379")
-	conf.Redis.DB = fromEnvfInt(conf.Redis.DB, "REDIS_DB", 0)
-	conf.Redis.Password = fromEnvfString(conf.Redis.Password, "REDIS_PWD", "")
-	conf.Redis.PoolSize = fromEnvfInt(conf.Redis.PoolSize, "REDIS_POOL_SIZE", 50)
+	p.String(&conf.Host, "HOST", "")
+	p.String(&conf.Port, "PORT", "1323")
+	p.String(&conf.Secret, "SECRET", "123456")
+	p.String(&conf.Env, "ENV", "development")
+	p.Int(&conf.ReadBufferSize, "READ_BUFFER_SIZE", 2048)
+	p.Int(&conf.WriteBufferSize, "WRITE_BUFFER_SIZE", 2048)
 
-	conf.Database.DSN = fromEnvfString(conf.Database.DSN, "DATABASE_DSN", "")
-	conf.Database.Driver = fromEnvfString(conf.Database.Driver, "DATABASE_DRIVER", "")
-	conf.Database.MaxOpenConns = fromEnvfInt(conf.Redis.DB, "DATABASE_MAX_OPEN_CONNS", 50)
-	conf.Database.MaxIdleConns = fromEnvfInt(conf.Redis.DB, "DATABASE_MAX_IDLE_CONNS", 5)
+	p.SetPrefix("REDIS_")
+	re := conf.Redis
+	p.String(&re.Addr, "ADDR", "localhost:6379")
+	p.Int(&re.DB, "DB", 0)
+	p.String(&re.Password, "PWD", "")
+	p.Int(&re.PoolSize, "POOL_SIZE", 50)
 
-	conf.Mongo.DSN = fromEnvfString(conf.Mongo.DSN, "MONGO_DSN", "")
-	conf.Mongo.Database = fromEnvfString(conf.Mongo.Database, "MONGO_DATABASE", "")
+	p.SetPrefix("DATABASE_")
+	db := conf.Database
+	p.String(&db.DSN, "DSN", "")
+	p.String(&db.Driver, "DRIVER", "")
+	p.Int(&db.MaxOpenConns, "MAX_OPEN_CONNS", 50)
+	p.Int(&db.MaxIdleConns, "MAX_IDLE_CONNS", 5)
 
-	conf.ChatGPT3.ApiKey = fromEnvfString(conf.ChatGPT3.ApiKey, "CHATGPT3_API_KEY", "")
+	p.SetPrefix("MONGO_")
+	mo := conf.Mongo
+	p.String(&mo.DSN, "DSN", "")
+	p.String(&mo.Database, "DATABASE", "")
 
-	conf.Minio.Endpoint = fromEnvfString(conf.ChatGPT3.ApiKey, "MINIO_ENDPOINT", "")
-	conf.Minio.AccessKeyID = fromEnvfString(conf.ChatGPT3.ApiKey, "MINIO_ACCESS_KEY_ID", "")
-	conf.Minio.SecretAccessKey = fromEnvfString(conf.ChatGPT3.ApiKey, "MINIO_SECRET_ACCESS_KEY", "")
-	conf.Minio.UseSSL = fromEnvfBool("MINIO_USE_SSL", false)
+	p.SetPrefix("CHATGPT3_")
+	ch := conf.ChatGPT3
+	p.String(&ch.ApiKey, "API_KEY", "")
+
+	p.SetPrefix("MINIO_")
+	mi := conf.Minio
+	p.String(&mi.Url, "URL", "")
+	p.String(&mi.Endpoint, "ENDPOINT", "")
+	p.String(&mi.AccessKeyID, "ACCESS_KEY_ID", "")
+	p.String(&mi.SecretAccessKey, "SECRET_ACCESS_KEY", "")
+	p.Bool(&mi.UseSSL, "USE_SSL", false)
+	p.String(&mi.Bucket, "BUCKET", "")
 }
 
-// GetConfig s
 func GetConfig() Config {
 	return conf
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-func NewClient() (*minio.Client, error) {
+func NewMinioClient() (*minio.Client, error) {
 	conf := configs.GetConfig().Minio
 	endpoint := conf.Endpoint
 	accessKeyID := conf.AccessKeyID

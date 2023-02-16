@@ -14,7 +14,6 @@ import (
 
 type StaticHandler struct{}
 
-// AuthHandler s
 func AttachStatic(g *echo.Group) {
 	var cmd *exec.Cmd
 	conf := configs.GetConfig()
