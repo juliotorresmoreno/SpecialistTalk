@@ -43,9 +43,15 @@ func (that *MessagesHandler) find(c echo.Context) error {
 	return helper.HTTPErrorNotImplementedError
 }
 
+type Attachment struct {
+	Name string `json:"name" valid:"required"`
+	Body string `json:"body" valid:"required"`
+}
+
 type POSTMessagesAddPayload struct {
-	Code    string `json:"code"    valid:"required"`
-	Message string `json:"message" valid:"required"`
+	Code        string       `json:"code"        valid:"required"`
+	Message     string       `json:"message"     valid:"required"`
+	Attachments []Attachment `json:"attachments"`
 }
 
 func (that *MessagesHandler) add(c echo.Context) error {

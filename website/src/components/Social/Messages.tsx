@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import SocialContext from './SocialContext'
 import { useAdd } from '../../services/messages'
 import { useAppSelector } from '../../store/hooks'
-import Button from '../Button'
 import Emoji from '../Emoji'
 import _Input from '../Input'
 import Message from './Message'
@@ -35,14 +34,16 @@ const Input = styled(_Input)`
 `
 
 const AttachmentContainer = styled.div`
-  //gap: var(--spacing-v1);
   margin-bottom: var(--spacing-v1);
-  //display: flex;
 `
 
 const Attachment = styled.div`
   display: inline-block;
-  margin-right: var(--spacing-v1); ;
+  margin-right: var(--spacing-v1);
+`
+
+const SendButton = styled(Anchor)`
+  line-height: calc(var(--spacing-v1) * 3.5);
 `
 
 const Messages = () => {
@@ -52,30 +53,27 @@ const Messages = () => {
   const { isLoading, error, add } = useAdd()
   const id = useParams().id as string
   const notifications = useAppSelector((state) => state.messages.notifications)
-  const onKeyUp: React.KeyboardEventHandler<HTMLInputElement> = (evt) => {
+
+  const send = () => {
     const current = inputRef.current
-    if (evt.key !== 'Enter') return
     if (!current) return
 
     const message = current.value
+
     add({
       code: id as string,
       message,
-      attachments: attachments.map(({ name, body = '' }) => ({ name, body })),
+      attachments: attachments.map((file) => ({
+        name: file.name,
+        body: file.body ?? '',
+      })),
     })
     current.value = ''
     setAttachments([])
   }
-  const onSend: React.MouseEventHandler<HTMLButtonElement> = (evt) => {
-    const current = inputRef.current
-    if (!current) return
 
-    const message = current.value
-    current.value = ''
-    add({
-      code: id as string,
-      message,
-    })
+  const onKeyUp: React.KeyboardEventHandler<HTMLInputElement> = (evt) => {
+    if (evt.key === 'Enter') return send()
   }
 
   useEffect(() => {
@@ -83,9 +81,7 @@ const Messages = () => {
     const clientHeight = current?.clientHeight ?? 0
     const scrollHeight = current?.scrollHeight ?? 0
     const top = scrollHeight - clientHeight
-    current?.scrollTo({
-      top: top,
-    })
+    current?.scrollTo({ top })
   })
 
   const messages = notifications[id]?.messages ?? []
@@ -128,10 +124,10 @@ const Messages = () => {
       </Content>
       <InputContainer>
         <Emoji onSelect={onEmojiSelect} />
-        <Input ref={inputRef} onKeyUp={onKeyUp} />
-        <Button onClick={onSend}>
+        <Input ref={inputRef} disabled={isLoading} onKeyUp={onKeyUp} />
+        <SendButton onClick={() => send()}>
           <span className="material-symbols-outlined">send</span>
-        </Button>
+        </SendButton>
       </InputContainer>
     </Container>
   )

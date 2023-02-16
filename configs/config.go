@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/go-yaml/yaml"
 	"github.com/joho/godotenv"
@@ -41,18 +42,26 @@ type ChatGPT3 struct {
 	ApiKey string `json:"api_key" yaml:"api_key"`
 }
 
+type Minio struct {
+	Endpoint        string `json:"endpoint"          yaml:"endpoint"`
+	AccessKeyID     string `json:"access_key_id"     yaml:"access_key_id"`
+	SecretAccessKey string `json:"secret_access_key" yaml:"secret_access_key"`
+	UseSSL          bool   `json:"use_ssl"           yaml:"use_ssl"`
+}
+
 // Config s
 type Config struct {
-	Env             string    `json:"env"             yaml:"env"`
-	Secret          string    `json:"secret"          yaml:"secret"`
-	Host            string    `json:"host"            yaml:"host"`
-	Port            string    `json:"port"            yaml:"port"`
-	ReadBufferSize  int       `json:"readBufferSize"  yaml:"readBufferSize"`
-	WriteBufferSize int       `json:"writeBufferSize" yaml:"writeBufferSize"`
-	Database        *Database `json:"database"        yaml:"database"`
-	Redis           *Redis    `json:"redis"           yaml:"redis"`
-	Mongo           *Mongo    `json:"mongo"           yaml:"mongo"`
-	ChatGPT3        *ChatGPT3 `json:"chat_gpt"        yaml:"chat_gpt"`
+	Env             string    `json:"env"               yaml:"env"`
+	Secret          string    `json:"secret"            yaml:"secret"`
+	Host            string    `json:"host"              yaml:"host"`
+	Port            string    `json:"port"              yaml:"port"`
+	ReadBufferSize  int       `json:"read_buffer_size"  yaml:"read_buffer_size"`
+	WriteBufferSize int       `json:"write_buffer_size" yaml:"write_buffer_size"`
+	Database        *Database `json:"database"          yaml:"database"`
+	Redis           *Redis    `json:"redis"             yaml:"redis"`
+	Mongo           *Mongo    `json:"mongo"             yaml:"mongo"`
+	ChatGPT3        *ChatGPT3 `json:"chat_gpt"          yaml:"chat_gpt"`
+	Minio           *Minio    `json:"minio"             yaml:"minio"`
 }
 
 var conf Config = Config{
@@ -60,8 +69,17 @@ var conf Config = Config{
 	Redis:           &Redis{},
 	Mongo:           &Mongo{},
 	ChatGPT3:        &ChatGPT3{},
+	Minio:           &Minio{},
 	ReadBufferSize:  0,
 	WriteBufferSize: 0,
+}
+
+func fromEnvfBool(zero string, some bool) bool {
+	val := os.Getenv(zero)
+	if val != "" {
+		return strings.ToLower(val) == "true"
+	}
+	return some
 }
 
 func fromEnvfString(value string, zero string, some string) string {
@@ -109,8 +127,8 @@ func init() {
 	getConfigArgs()
 	f, err := os.Open(configPath)
 	if err == nil {
-		err = yaml.NewDecoder(f).Decode(&conf)
-		if err == nil {
+		decoder := yaml.NewDecoder(f)
+		if err = decoder.Decode(&conf); err == nil {
 			return
 		}
 	}
@@ -138,6 +156,11 @@ func init() {
 	conf.Mongo.Database = fromEnvfString(conf.Mongo.Database, "MONGO_DATABASE", "")
 
 	conf.ChatGPT3.ApiKey = fromEnvfString(conf.ChatGPT3.ApiKey, "CHATGPT3_API_KEY", "")
+
+	conf.Minio.Endpoint = fromEnvfString(conf.ChatGPT3.ApiKey, "MINIO_ENDPOINT", "")
+	conf.Minio.AccessKeyID = fromEnvfString(conf.ChatGPT3.ApiKey, "MINIO_ACCESS_KEY_ID", "")
+	conf.Minio.SecretAccessKey = fromEnvfString(conf.ChatGPT3.ApiKey, "MINIO_SECRET_ACCESS_KEY", "")
+	conf.Minio.UseSSL = fromEnvfBool("MINIO_USE_SSL", false)
 }
 
 // GetConfig s
