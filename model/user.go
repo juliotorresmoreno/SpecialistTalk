@@ -29,7 +29,7 @@ type User struct {
 	Password      string    `xorm:"password varchar(100) not null"            valid:""            `
 	ValidPassword string    `xorm:"-"                                         valid:"password"    json:"-"`
 	RecoveryToken string    `xorm:"recovery_token varchar(100) not null"      valid:""            json:"-"`
-	Owner         string    `xorm:"owner varchar(100) not null"               valid:"required"    json:"-"`
+	Owner         string    `xorm:"owner varchar(100) not null index"         valid:"required"    json:"-"`
 	CreatedAt     time.Time `xorm:"created_at created"                        valid:""            json:"-"`
 	UpdatedAt     time.Time `xorm:"updated_at updated"                        valid:""            json:"-"`
 	Version       int       `xorm:"version version"                           valid:""            json:"-"`
