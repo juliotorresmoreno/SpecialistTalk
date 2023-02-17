@@ -9,60 +9,62 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/go-yaml/yaml"
 	"github.com/joho/godotenv"
 )
 
 type MongoDB struct {
-	DSN          string `json:"dsn"          yaml:"dsn"`
-	MaxOpenConns int    `json:"maxOpenConns" yaml:"maxOpenConns"`
-	MaxIdleConns int    `json:"maxIdleConns" yaml:"maxIdleConns"`
+	DSN          string `json:"dsn"          yaml:"dsn"          valid:"required"`
+	MaxOpenConns int    `json:"maxOpenConns" yaml:"maxOpenConns" valid:"required"`
+	MaxIdleConns int    `json:"maxIdleConns" yaml:"maxIdleConns" valid:"required"`
 }
 
 type Database struct {
-	Driver       string `json:"driver"       yaml:"driver"`
-	DSN          string `json:"dsn"          yaml:"dsn"`
-	MaxOpenConns int    `json:"maxOpenConns" yaml:"maxOpenConns"`
-	MaxIdleConns int    `json:"maxIdleConns" yaml:"maxIdleConns"`
+	Driver       string `json:"driver"       yaml:"driver"       valid:"required"`
+	DSN          string `json:"dsn"          yaml:"dsn"          valid:"required"`
+	MaxOpenConns int    `json:"maxOpenConns" yaml:"maxOpenConns" valid:"required"`
+	MaxIdleConns int    `json:"maxIdleConns" yaml:"maxIdleConns" valid:"required"`
 }
 
 type Redis struct {
-	Addr     string `json:"addr"     yaml:"addr"`
-	Password string `json:"password" yaml:"password"`
-	DB       int    `json:"db"       yaml:"db"`
-	PoolSize int    `json:"poolSize" yaml:"poolSize"`
+	Addr     string `json:"addr"     yaml:"addr"     valid:"required"`
+	Password string `json:"password" yaml:"password" valid:""`
+	DB       int    `json:"db"       yaml:"db"       valid:""`
+	PoolSize int    `json:"poolSize" yaml:"poolSize" valid:"required"`
 }
 
 type Mongo struct {
-	DSN      string `json:"dsn"      yaml:"dsn"`
-	Database string `json:"database" yaml:"database"`
+	DSN            string `json:"dsn"             yaml:"dsn"             valid:"required"`
+	StorageDB      string `json:"storage_db"      yaml:"storage_db"      valid:"required"`
+	ConversationDB string `json:"conversation_db" yaml:"conversation_db" valid:"required"`
 }
 
 type ChatGPT3 struct {
-	ApiKey string `json:"api_key" yaml:"api_key"`
+	ApiKey string `json:"api_key" yaml:"api_key" valid:"required"`
 }
 
 type Minio struct {
-	Url             string `json:"url"               yaml:"url"`
-	Endpoint        string `json:"endpoint"          yaml:"endpoint"`
-	AccessKeyID     string `json:"access_key_id"     yaml:"access_key_id"`
-	SecretAccessKey string `json:"secret_access_key" yaml:"secret_access_key"`
-	UseSSL          bool   `json:"use_ssl"           yaml:"use_ssl"`
-	Bucket          string `json:"bucket"            yaml:"bucket"`
+	Url             string `json:"url"               yaml:"url"               valid:"required"`
+	Endpoint        string `json:"endpoint"          yaml:"endpoint"          valid:"required"`
+	AccessKeyID     string `json:"access_key_id"     yaml:"access_key_id"     valid:"required"`
+	SecretAccessKey string `json:"secret_access_key" yaml:"secret_access_key" valid:"required"`
+	UseSSL          bool   `json:"use_ssl"           yaml:"use_ssl"           valid:""`
+	Bucket          string `json:"bucket"            yaml:"bucket"            valid:"required"`
 }
 
 type Config struct {
-	Env             string    `json:"env"               yaml:"env"`
-	Secret          string    `json:"secret"            yaml:"secret"`
-	Host            string    `json:"host"              yaml:"host"`
-	Port            string    `json:"port"              yaml:"port"`
-	ReadBufferSize  int       `json:"read_buffer_size"  yaml:"read_buffer_size"`
-	WriteBufferSize int       `json:"write_buffer_size" yaml:"write_buffer_size"`
-	Database        *Database `json:"database"          yaml:"database"`
-	Redis           *Redis    `json:"redis"             yaml:"redis"`
-	Mongo           *Mongo    `json:"mongo"             yaml:"mongo"`
-	ChatGPT3        *ChatGPT3 `json:"chat_gpt"          yaml:"chat_gpt"`
-	Minio           *Minio    `json:"minio"             yaml:"minio"`
+	Env             string    `json:"env"               yaml:"env"               valid:"required"`
+	Secret          string    `json:"secret"            yaml:"secret"            valid:"required"`
+	Host            string    `json:"host"              yaml:"host"              valid:"required"`
+	Port            string    `json:"port"              yaml:"port"              valid:"required"`
+	ReadBufferSize  int       `json:"read_buffer_size"  yaml:"read_buffer_size"  valid:"required"`
+	WriteBufferSize int       `json:"write_buffer_size" yaml:"write_buffer_size" valid:"required"`
+	Database        *Database `json:"database"          yaml:"database"          valid:"required"`
+	Redis           *Redis    `json:"redis"             yaml:"redis"             valid:"required"`
+	Mongo           *Mongo    `json:"mongo"             yaml:"mongo"             valid:"required"`
+	ChatGPT3        *ChatGPT3 `json:"chat_gpt"          yaml:"chat_gpt"          valid:"required"`
+	Minio           *Minio    `json:"minio"             yaml:"minio"             valid:"required"`
 }
 
 var conf Config = Config{
@@ -133,16 +135,20 @@ func getConfigArgs() {
 	flag.Parse()
 }
 
-func init() {
-	getConfigArgs()
+func loadFromYaml() error {
 	f, err := os.Open(configPath)
-	if err == nil {
-		decoder := yaml.NewDecoder(f)
-		if err = decoder.Decode(&conf); err == nil {
-			return
-		}
+	if err != nil {
+		return err
 	}
+	decoder := yaml.NewDecoder(f)
+	err = decoder.Decode(&conf)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
+func loadFromEnv() error {
 	_ = godotenv.Load()
 
 	p := &Parser{}
@@ -171,7 +177,8 @@ func init() {
 	p.SetPrefix("MONGO_")
 	mo := conf.Mongo
 	p.String(&mo.DSN, "DSN", "")
-	p.String(&mo.Database, "DATABASE", "")
+	p.String(&mo.StorageDB, "STORAGE_DB", "")
+	p.String(&mo.ConversationDB, "CONVERSATION_DB", "")
 
 	p.SetPrefix("CHATGPT3_")
 	ch := conf.ChatGPT3
@@ -185,6 +192,20 @@ func init() {
 	p.String(&mi.SecretAccessKey, "SECRET_ACCESS_KEY", "")
 	p.Bool(&mi.UseSSL, "USE_SSL", false)
 	p.String(&mi.Bucket, "BUCKET", "")
+
+	return nil
+}
+
+func init() {
+	getConfigArgs()
+	err := loadFromYaml()
+	if err != nil {
+		loadFromEnv()
+	}
+	_, err = govalidator.ValidateStruct(conf)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func GetConfig() Config {

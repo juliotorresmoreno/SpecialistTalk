@@ -28,12 +28,27 @@ export function useApi<Payload = any, Response = any>(
         method: method,
         headers: {
           'X-API-Key': session?.token ?? '',
-          'Content-Type': 'application/json',
         },
       }
-      if (payload) args.body = JSON.stringify(payload)
+      let id = ''
+      if (payload) {
+        if (payload instanceof FormData) {
+          args.body = payload
+          id = payload.get('id')?.toString() ?? ''
+          if (id) payload.delete('id')
+        } else {
+          args.body = JSON.stringify(payload)
+          id = (payload as any).id ?? ''
+          if (id) delete (payload as any).id
+          args.headers = {
+            ...args.headers,
+            'Content-Type': 'application/json',
+          }
+        }
+      }
+      let _url = id ? url + '/' + id : url
 
-      const response = await fetch(url, args)
+      const response = await fetch(_url, args)
       const content = await response.json()
       if (!response.ok) {
         throw new Error(content.message)
@@ -65,30 +80,31 @@ export function useAdd<Payload = any, Response = any>(
   return { isLoading, error, add: apply }
 }
 
+type WithId = { id: string | number }
+
 export function useUpdate<Payload = any, Response = any>(
   url: string,
-  id: string,
   opts?: ApiOpts
 ) {
-  const _url = url + '/' + id
-  const { error, isLoading, apply } = useApi<Payload, Response>(
+  type PayloadWithId = Payload & WithId
+  const { error, isLoading, apply } = useApi<PayloadWithId, Response>(
     'PATCH',
-    _url,
+    url,
     opts
   )
 
   return { isLoading, error, update: apply }
 }
 
-export function useRemove(url: string, id: string, opts?: ApiOpts) {
-  const _url = url + '/' + id
-  const { error, isLoading, apply } = useApi<null, void>('DELETE', _url, opts)
+export function useRemove(url: string, opts?: ApiOpts) {
+  const _url = url
+  const { error, isLoading, apply } = useApi<WithId, void>('DELETE', _url, opts)
 
   return {
     isLoading,
     error,
-    remove: async () => {
-      await apply(null)
+    remove: async (id: string | number) => {
+      await apply({ id })
     },
   }
 }

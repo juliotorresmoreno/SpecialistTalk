@@ -37,7 +37,7 @@ const AttachmentContainer = styled.div`
   margin-bottom: var(--spacing-v1);
 `
 
-const Attachment = styled.div`
+const Attachment = styled(Anchor)`
   display: inline-block;
   margin-right: var(--spacing-v1);
 `
@@ -111,14 +111,14 @@ const Messages = () => {
         ))}
         <AttachmentContainer>
           {attachments.map((x, key) => (
-            <Anchor
+            <Attachment
               key={'attachment-' + key}
               href={x.url}
               download={x.name}
               onClick={() => {}}
             >
-              <Attachment>{x.name}</Attachment>
-            </Anchor>
+              {x.name}
+            </Attachment>
           ))}
         </AttachmentContainer>
       </Content>

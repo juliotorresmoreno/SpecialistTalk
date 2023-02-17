@@ -81,7 +81,7 @@ func (that *MessagesHandler) add(c echo.Context) error {
 	}
 
 	collectionName := "conversation_" + payload.Code
-	collection := mongoCli.Database(conf.Mongo.Database).Collection(collectionName)
+	collection := mongoCli.Database(conf.Mongo.ConversationDB).Collection(collectionName)
 
 	id := primitive.NewObjectID()
 	now := time.Now()

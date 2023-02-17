@@ -5,12 +5,15 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 	"github.com/juliotorresmoreno/SpecialistTalk/helper"
+	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/juliotorresmoreno/SpecialistTalk/services"
 	"github.com/labstack/echo/v4"
 	"github.com/minio/minio-go/v7"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type StorageHandler struct{}
@@ -34,7 +37,11 @@ type POSTAddPayload struct {
 }
 
 func (u *StorageHandler) add(c echo.Context) error {
-	conf := configs.GetConfig().Minio
+	session, err := helper.ValidateSession(c)
+	if err != nil {
+		return err
+	}
+	conf := configs.GetConfig()
 	minioCli, err := services.NewMinioClient()
 	if err != nil {
 		return helper.HTTPErrorInternalServerError
@@ -52,10 +59,31 @@ func (u *StorageHandler) add(c echo.Context) error {
 		helper.MakeHTTPError(500, err)
 	}
 
+	mongoCli, err := services.GetPoolMongo()
+	if err != nil {
+		return helper.HTTPErrorInternalServerError
+	}
+
+	now := time.Now()
+	id := primitive.NewObjectID()
+	f := &model.File{
+		ID:        &id,
+		Name:      file.Filename,
+		Owner:     session.Username,
+		CreatedAt: &now,
+	}
+	db := mongoCli.Database(conf.Mongo.StorageDB)
+	collection := db.Collection(f.TableName())
 	ctx := context.Background()
-	bucket := conf.Bucket
+	_, err = collection.InsertOne(ctx, f)
+	if err != nil {
+		return helper.HTTPErrorInternalServerError
+	}
+
+	ctx = context.Background()
+	bucket := conf.Minio.Bucket
 	opts := minio.PutObjectOptions{}
-	info, err := minioCli.PutObject(ctx, bucket, file.Filename, src, file.Size, opts)
+	info, err := minioCli.PutObject(ctx, bucket, f.ID.Hex(), src, file.Size, opts)
 	if err != nil {
 		return helper.HTTPErrorNotFound
 	}
@@ -100,7 +128,6 @@ var responseHeaders = []string{
 	"Date",
 	"Etag",
 	"Last-Modified",
-	"Server",
 	"Strict-Transport-Security",
 	"Vary",
 	"Connection",
@@ -134,11 +161,21 @@ func (u *StorageHandler) getFromHTTP(c echo.Context) error {
 		}
 	}
 
+	if c.QueryParam("download") == "true" {
+		response.Header().Set("Content-Type", "application/octet-stream")
+		response.WriteHeader(resp.StatusCode)
+
+		_, err = io.Copy(response, resp.Body)
+		if err != nil {
+			return helper.HTTPErrorInternalServerError
+		}
+		return nil
+	}
+
 	b := make([]byte, 512)
-	resp.Body.Read(b)
+	_, _ = resp.Body.Read(b)
 
-	contentType := http.DetectContentType(b[:512])
-
+	contentType := http.DetectContentType(b)
 	response.Header().Set("Content-Type", contentType)
 	response.WriteHeader(resp.StatusCode)
 

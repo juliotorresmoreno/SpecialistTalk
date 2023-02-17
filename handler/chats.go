@@ -51,7 +51,7 @@ func (that *ChatsHandler) get(c echo.Context) error {
 	}
 
 	collectionName := "conversation_" + code
-	collection := mongoCli.Database(conf.Mongo.Database).Collection(collectionName)
+	collection := mongoCli.Database(conf.Mongo.ConversationDB).Collection(collectionName)
 	limit := int64(10)
 	curr, _ := collection.Find(context.Background(), map[string]interface{}{}, &options.FindOptions{
 		Limit: &limit,
