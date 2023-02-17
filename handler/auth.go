@@ -52,7 +52,7 @@ func (el *AuthHandler) POSTSingUp(c echo.Context) error {
 	u.LastName = p.LastName
 	u.Username = p.Username
 	u.ValidPassword = p.Password
-	u.ACL = &model.ACL{Owner: p.Username}
+	u.Owner = p.Username
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusBadRequest, err)
 	}
@@ -152,7 +152,7 @@ func (el *AuthHandler) POSTRecovery(c echo.Context) error {
 	u := &model.User{RecoveryToken: token}
 	q := &model.User{Email: p.Email}
 
-	_, err = conn.Omit("acl").Update(u, q)
+	_, err = conn.Omit("owner").Update(u, q)
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
@@ -194,7 +194,7 @@ func (el *AuthHandler) POSTReset(c echo.Context) error {
 	if err := u.Check(); err != nil {
 		return helper.MakeHTTPError(http.StatusNotAcceptable, err)
 	}
-	_, err = conn.Omit("acl").Update(u, q)
+	_, err = conn.Omit("owner").Update(u, q)
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}

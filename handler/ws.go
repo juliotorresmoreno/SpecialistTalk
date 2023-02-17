@@ -118,7 +118,7 @@ func (u *HandlerWS) Register() {
 				continue
 			}
 			for _, chat := range chats {
-				username := chat.ACL.Owner
+				username := chat.Owner
 				if slot, ok := clients[username]; ok {
 					for client := range slot {
 						_ = client.conn.WriteJSON(c.Notification)

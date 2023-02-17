@@ -8,11 +8,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// ACL s
-type ACL struct {
-	Owner string `json:"owner"`
-}
-
 type Rol string
 
 const RolUser = "user"
@@ -34,7 +29,7 @@ type User struct {
 	Password      string    `xorm:"password varchar(100) not null"            valid:""            `
 	ValidPassword string    `xorm:"-"                                         valid:"password"    json:"-"`
 	RecoveryToken string    `xorm:"recovery_token varchar(100) not null"      valid:""            json:"-"`
-	ACL           *ACL      `xorm:"acl json not null"                         valid:"required"    json:"-"`
+	Owner         string    `xorm:"owner varchar(100) not null"               valid:"required"    json:"-"`
 	CreatedAt     time.Time `xorm:"created_at created"                        valid:""            json:"-"`
 	UpdatedAt     time.Time `xorm:"updated_at updated"                        valid:""            json:"-"`
 	Version       int       `xorm:"version version"                           valid:""            json:"-"`
@@ -47,7 +42,7 @@ func (u *User) TableName() string {
 
 type user struct {
 	ID       int    `json:"id"`
-	ACL      ACL    `json:"acl"`
+	Owner    string `json:"owner"`
 	Email    string `json:"email"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
@@ -118,7 +113,7 @@ func (that *User) UnmarshalJSON(b []byte) error {
 	that.Facebook = u.Facebook
 	that.Linkedin = u.Linkedin
 
-	that.ACL = &ACL{Owner: u.Username}
+	that.Owner = u.Username
 	if err != nil {
 		return err
 	}

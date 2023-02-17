@@ -26,7 +26,7 @@ func Session(handler echo.HandlerFunc) echo.HandlerFunc {
 			if err == nil {
 				id, _ := strconv.Atoi(r)
 				u := &model.User{ID: id}
-				ok, _ := conn.Select("id, username, name, lastname, acl").Get(u)
+				ok, _ := conn.Select("id, username, name, lastname, owner").Get(u)
 				if ok {
 					u.Password = ""
 					u.ValidPassword = ""

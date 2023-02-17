@@ -146,7 +146,7 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		token := helper.GenerateToken()
 		chat.Code = token
 		chat.Name = u.Name + " " + u.LastName
-		chat.ACL = &model.ACL{Owner: session.Username}
+		chat.Owner = session.Username
 		chat.Status = model.ChatStatusActive
 		if err = chat.Check(); err != nil {
 			return helper.MakeHTTPError(http.StatusInternalServerError, err)
@@ -156,7 +156,7 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		chat2 := &model.Chat{UserID: session.ID}
 		chat2.Code = token
 		chat2.Name = session.Name + " " + session.LastName
-		chat2.ACL = &model.ACL{Owner: u.Username}
+		chat2.Owner = u.Username
 		chat2.Status = model.ChatStatusCreated
 		if err = chat.Check(); err != nil {
 			return helper.MakeHTTPError(http.StatusInternalServerError, err)

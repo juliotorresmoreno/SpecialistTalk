@@ -13,7 +13,7 @@ type Chat struct {
 	Name      string    `xorm:"name varchar(50) not null"         valid:"required,name"        json:"name"`
 	Code      string    `xorm:"code varchar(50) not null index"   valid:"required"             json:"code"`
 	Status    string    `xorm:"status varchar(50) not null"       valid:"required,chat_status" json:"status"`
-	ACL       *ACL      `xorm:"acl json not null"                 valid:"required"             json:"-"`
+	Owner     string    `xorm:"owner varchar(100) not null"       valid:"required"             json:"-"`
 	CreatedAt time.Time `xorm:"created_at created"                                             json:"-"`
 	UpdatedAt time.Time `xorm:"updated_at updated"                                             json:"-"`
 	DeletedAt time.Time `xorm:"deleted_at deleted"                                             json:"-"`

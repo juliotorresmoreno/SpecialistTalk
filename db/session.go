@@ -45,18 +45,15 @@ func (e *Session) SessionWithACL() *xorm.Session {
 	return e.Session
 }
 
-var aclType = reflect.ValueOf(model.ACL{}).Type()
-
 func (e *Session) Insert(bean ...interface{}) (int64, error) {
 	for _, b := range bean {
 		field := reflect.ValueOf(b)
 		if field.Kind() != reflect.Ptr {
 			field = reflect.ValueOf(&b)
 		}
-		field = field.Elem().FieldByName("ACL")
-		if field.CanSet() && field.Type() == aclType {
-			acl := &model.ACL{Owner: e.user.Username}
-			field.Set(reflect.ValueOf(acl))
+		field = field.Elem().FieldByName("Owner")
+		if field.CanSet() {
+			field.Set(reflect.ValueOf(e.user.Username))
 		}
 	}
 
@@ -68,10 +65,9 @@ func (e *Session) InsertOne(bean interface{}) (int64, error) {
 	if field.Kind() != reflect.Ptr {
 		field = reflect.ValueOf(&bean)
 	}
-	field = field.Elem().FieldByName("ACL")
-	if field.CanSet() && field.Type() == aclType && field.IsZero() {
-		acl := &model.ACL{Owner: e.user.Username}
-		field.Set(reflect.ValueOf(acl))
+	field = field.Elem().FieldByName("Owner")
+	if field.CanSet() {
+		field.Set(reflect.ValueOf(e.user.Username))
 	}
 	return e.Session.InsertOne(bean)
 }
