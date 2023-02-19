@@ -7,4 +7,6 @@ const root = createRoot(container)
 
 const app = Root({})
 
-root.render(app)
+window.addEventListener('load', function () {
+  root.render(app)
+})

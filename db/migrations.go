@@ -2,6 +2,7 @@ package db
 
 import (
 	"log"
+	"strings"
 
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
@@ -17,12 +18,12 @@ func Migrate() {
 	defer conn.Close()
 
 	err = conn.Sync2(&model.User{})
-	if err != nil {
+	if err != nil && !strings.HasPrefix(err.Error(), "Unknown col lower") {
 		log.Fatal(err)
 	}
 
-	_, _ = conn.Query("CREATE INDEX \"IDX_users_name\" ON public.users USING GIN (name);")
-	_, _ = conn.Query("CREATE INDEX \"IDX_users_lastname\" ON public.users USING GIN (lastname);")
+	_, _ = conn.Query("CREATE INDEX \"IDX_users_name\" ON public.users USING GIN (lower(name));")
+	_, _ = conn.Query("CREATE INDEX \"IDX_users_lastname\" ON public.users USING GIN (lower(lastname));")
 
 	err = conn.Sync2(&model.Chat{})
 	if err != nil {

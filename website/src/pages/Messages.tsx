@@ -43,6 +43,7 @@ const url = config.baseUrl + '/chats'
 const MessagesPage = withDataById<any, IChat>({
   WrappedComponent: _MessagesPage,
   url,
+  withAuth: true,
   skipper(id) {
     const notifications = store.getState().messages.notifications
     return notifications[id] ?? null

@@ -52,7 +52,7 @@ func (e *Session) Insert(bean ...interface{}) (int64, error) {
 			field = reflect.ValueOf(&b)
 		}
 		field = field.Elem().FieldByName("Owner")
-		if field.CanSet() {
+		if field.CanSet() && e.user != nil {
 			field.Set(reflect.ValueOf(e.user.Username))
 		}
 	}
@@ -66,8 +66,9 @@ func (e *Session) InsertOne(bean interface{}) (int64, error) {
 		field = reflect.ValueOf(&bean)
 	}
 	field = field.Elem().FieldByName("Owner")
-	if field.CanSet() {
-		field.Set(reflect.ValueOf(e.user.Username))
+	if field.CanSet() && e.user != nil {
+		value := reflect.ValueOf(e.user.Username)
+		field.Set(value)
 	}
 	return e.Session.InsertOne(bean)
 }

@@ -15,7 +15,7 @@ import (
 type UsersHandler struct {
 }
 
-func (that *UsersHandler) findUsers(c echo.Context) error {
+func (that *UsersHandler) find(c echo.Context) error {
 	session, err := helper.ValidateSession(c)
 	if session == nil {
 		return err
@@ -25,7 +25,6 @@ func (that *UsersHandler) findUsers(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	users := make([]model.User, 0)
 
 	limit, skip := helper.Paginate(c)
@@ -34,7 +33,7 @@ func (that *UsersHandler) findUsers(c echo.Context) error {
 		return c.JSON(200, users)
 	}
 
-	query := builder.Like{"name", q}.Or(builder.Like{"lastname", q})
+	query := builder.Like{"lower(name)", q}.Or(builder.Like{"lower(lastname)", q})
 	err = conn.
 		Where("id <> ?", session.ID).
 		And(query).
@@ -46,7 +45,7 @@ func (that *UsersHandler) findUsers(c echo.Context) error {
 	return c.JSON(200, users)
 }
 
-func (that *UsersHandler) findUser(c echo.Context) error {
+func (that *UsersHandler) get(c echo.Context) error {
 	_session := c.Get("session")
 	if _session == nil {
 		return helper.HTTPErrorUnauthorized
@@ -65,7 +64,7 @@ func (that *UsersHandler) findUser(c echo.Context) error {
 	return c.JSON(200, u)
 }
 
-func (that *UsersHandler) addUser(c echo.Context) error {
+func (that *UsersHandler) add(c echo.Context) error {
 	u := &model.User{}
 	if err := c.Bind(u); err != nil {
 		return helper.MakeHTTPError(http.StatusBadRequest, err)
@@ -84,7 +83,7 @@ func (that *UsersHandler) addUser(c echo.Context) error {
 	return c.JSON(202, u)
 }
 
-func (that *UsersHandler) updateUser(c echo.Context) error {
+func (that *UsersHandler) update(c echo.Context) error {
 	_session := c.Get("session")
 	if _session == nil {
 		return helper.HTTPErrorUnauthorized
@@ -132,8 +131,8 @@ func (that *UsersHandler) updateUser(c echo.Context) error {
 // AttachUsers s
 func AttachUsers(g *echo.Group) {
 	u := &UsersHandler{}
-	g.GET("", u.findUsers)
-	g.GET("/:user_id", u.findUser)
-	g.PUT("", u.addUser)
-	g.PATCH("/:user_id", u.updateUser)
+	g.GET("", u.find)
+	g.GET("/:user_id", u.get)
+	g.PUT("", u.add)
+	g.PATCH("/:user_id", u.update)
 }

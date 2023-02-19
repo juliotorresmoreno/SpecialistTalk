@@ -40,12 +40,12 @@ func GetConnectionPool() (*Engine, error) {
 func GetConnectionPoolWithSession(conf *configs.Database, user *model.User) (*Engine, error) {
 	conn, err := GetConnectionPool()
 
-	r := fmt.Sprintf("owner = '%v'", user.Username)
-	w := fmt.Sprintf("owner = '%v'", user.Username)
+	queryRead := fmt.Sprintf("owner = '%v'", user.Username)
+	queryWrite := fmt.Sprintf("owner = '%v'", user.Username)
 
 	engine := &Engine{Engine: conn.Engine}
-	engine.permisionQueryRead = r
-	engine.permisionQueryWrite = w
+	engine.permisionQueryRead = queryRead
+	engine.permisionQueryWrite = queryWrite
 	engine.user = user
 
 	return engine, err

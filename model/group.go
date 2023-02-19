@@ -9,7 +9,7 @@ type Group struct {
 	Owner     string    `xorm:"owner varchar(100) not null not null index" valid:"required"`
 	CreatedAt time.Time `xorm:"created_at created"`
 	UpdatedAt time.Time `xorm:"updated_at updated"`
-	Version   int       `xorm:"version version"`
+	Version   int       `xorm:"bigint version"`
 }
 
 // TableName s

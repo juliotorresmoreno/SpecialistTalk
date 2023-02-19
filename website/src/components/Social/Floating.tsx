@@ -7,6 +7,7 @@ import useSearch from '../../hooks/useSearch'
 import { IChat } from '../../models/chat'
 import { useAdd } from '../../services/chats'
 import { useAppSelector } from '../../store/hooks'
+import Ads from '../Ads'
 import Input from '../Input'
 
 const ContactsContainer = styled.div`
@@ -104,6 +105,11 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
 }
 
 const url = config.baseUrl + '/chats'
-const Floating = withData(_Floating, url)
+const Floating = withData({
+  WrappedComponent: _Floating,
+  withAuth: true,
+  url,
+  FallbackComponent: Ads,
+})
 
 export default Floating

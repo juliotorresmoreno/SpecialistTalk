@@ -17,7 +17,7 @@ type Chat struct {
 	CreatedAt time.Time `xorm:"created_at created"                                             json:"-"`
 	UpdatedAt time.Time `xorm:"updated_at updated"                                             json:"-"`
 	DeletedAt time.Time `xorm:"deleted_at deleted"                                             json:"-"`
-	Version   int       `xorm:"version version"                                                json:"-"`
+	Version   int       `xorm:"bigint version"                                                 json:"-"`
 }
 
 const ChatStatusActive = "active"

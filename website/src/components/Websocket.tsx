@@ -49,14 +49,14 @@ const Websocket: React.FC<WebsocketProps> = ({ children }) => {
       if (unmount) return
 
       socket = null
-      setTimeout(() => reconnect(), 3000)
+      // setTimeout(() => reconnect(), 3000)
 
       hClose.forEach(({ handler }) => handler())
     })
   }
 
   useEffect(() => {
-    reconnect()
+    // reconnect()
     return () => {
       unmount = true
       socket?.close()
