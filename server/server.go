@@ -58,6 +58,7 @@ func NewServer() *ServerHTTP {
 	e.Use(middleware.CORS())
 	// e.Use(middleware.CSRF())
 
+	handler.AttachOpenID(e)
 	handler.AttachWS(e.Group("/realtime", middleware_app.Session))
 
 	handler.AttachSwaggerApi(e.Group("/docs"))

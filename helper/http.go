@@ -1,6 +1,9 @@
 package helper
 
 import (
+	"bufio"
+	"bytes"
+	"net"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -53,4 +56,46 @@ func GetPayload(c echo.Context, payload interface{}) (*model.User, error) {
 	}
 
 	return session, nil
+}
+
+func NewRegisterHTTPResponseWriter(w http.ResponseWriter) *RegisterHTTPResponseWriter {
+	return &RegisterHTTPResponseWriter{
+		w:          w,
+		header:     &http.Header{},
+		StatusCode: 0,
+		Buffer:     bytes.NewBuffer([]byte{}),
+	}
+}
+
+type RegisterHTTPResponseWriter struct {
+	w          http.ResponseWriter
+	StatusCode int
+	Buffer     *bytes.Buffer
+	header     *http.Header
+}
+
+func (u *RegisterHTTPResponseWriter) Header() http.Header {
+	return *u.header
+}
+
+func (u *RegisterHTTPResponseWriter) Write(b []byte) (int, error) {
+	return u.Buffer.Write(b)
+}
+
+func (u *RegisterHTTPResponseWriter) WriteHeader(statusCode int) {
+	u.StatusCode = statusCode
+}
+
+func (u *RegisterHTTPResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	hj, _ := u.w.(http.Hijacker)
+	return hj.Hijack()
+}
+
+func (u *RegisterHTTPResponseWriter) Push() {
+	for key := range *u.header {
+		value := u.header.Get(key)
+		u.w.Header().Set(key, value)
+	}
+	u.w.WriteHeader(u.StatusCode)
+	u.w.Write(u.Buffer.Bytes())
 }

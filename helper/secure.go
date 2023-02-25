@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	rand2 "math/rand"
+	mathrand "math/rand"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
@@ -32,7 +32,7 @@ func GetAesKey(secret string) []byte {
 	}
 
 	seed := binary.BigEndian.Uint64(h.Sum(nil))
-	r := rand2.New(rand2.NewSource(int64(seed)))
+	r := mathrand.New(mathrand.NewSource(int64(seed)))
 	t := fmt.Sprintf("%v%v", r.Int31(), r.Int31())[:16]
 
 	return append(s, t...)
@@ -72,7 +72,7 @@ func Decrypt(key []byte, securemess string) (string, error) {
 	}
 
 	if len(cipherText) < aes.BlockSize {
-		return "", errors.New("Ciphertext block size is too short")
+		return "", errors.New("ciphertext block size is too short")
 	}
 
 	//IV needs to be unique, but doesn't have to be secure.
@@ -109,4 +109,19 @@ func MakeSession(c echo.Context, u *model.User) error {
 	}
 
 	return c.JSON(200, session)
+}
+
+var seededRand *mathrand.Rand = mathrand.New(mathrand.NewSource(time.Now().UnixNano()))
+
+func StringWithCharset(length int, charset string) string {
+
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
+}
+
+func StringWithAlphanumCharset(length int) string {
+	return StringWithCharset(40, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz")
 }

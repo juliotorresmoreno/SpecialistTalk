@@ -21,7 +21,8 @@ func (that *UsersHandler) find(c echo.Context) error {
 		return err
 	}
 
-	conn, err := db.GetConnectionPool()
+	conf := configs.GetConfig()
+	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
 	if err != nil {
 		return err
 	}
@@ -30,11 +31,11 @@ func (that *UsersHandler) find(c echo.Context) error {
 	limit, skip := helper.Paginate(c)
 	q := c.QueryParam("q")
 	if q == "" {
-		return c.JSON(200, users)
+		return c.JSON(http.StatusOK, users)
 	}
 
 	query := builder.Like{"lower(name)", q}.Or(builder.Like{"lower(lastname)", q})
-	err = conn.
+	err = conn.NewSessionFree().
 		Where("id <> ?", session.ID).
 		And(query).
 		Limit(limit, skip).
@@ -42,53 +43,34 @@ func (that *UsersHandler) find(c echo.Context) error {
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
-	return c.JSON(200, users)
+	return c.JSON(http.StatusOK, users)
 }
 
 func (that *UsersHandler) get(c echo.Context) error {
-	_session := c.Get("session")
-	if _session == nil {
-		return helper.HTTPErrorUnauthorized
+	session, err := helper.ValidateSession(c)
+	if session == nil {
+		return err
 	}
 
-	conn, err := db.GetConnectionPool()
+	conf := configs.GetConfig()
+	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
 	if err != nil {
 		return err
 	}
 
 	u := &model.User{}
-	_, err = conn.SessionWithACL().Where("id = ?", c.Param("user_id")).Get(u)
+	_, err = conn.NewSessionFree().Where("id = ?", c.Param("user_id")).Get(u)
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
-	return c.JSON(200, u)
-}
-
-func (that *UsersHandler) add(c echo.Context) error {
-	u := &model.User{}
-	if err := c.Bind(u); err != nil {
-		return helper.MakeHTTPError(http.StatusBadRequest, err)
-	}
-	conn, err := db.GetConnectionPool()
-	if err != nil {
-		return helper.MakeHTTPError(http.StatusInternalServerError, err)
-	}
-
-	if err := u.Check(); err != nil {
-		return helper.MakeHTTPError(http.StatusInternalServerError, err)
-	}
-	if _, err := conn.InsertOne(u); err != nil {
-		return helper.MakeHTTPError(http.StatusInternalServerError, err)
-	}
-	return c.JSON(202, u)
+	return c.JSON(http.StatusOK, u)
 }
 
 func (that *UsersHandler) update(c echo.Context) error {
-	_session := c.Get("session")
-	if _session == nil {
-		return helper.HTTPErrorUnauthorized
+	session, err := helper.ValidateSession(c)
+	if session == nil {
+		return err
 	}
-	session := _session.(*model.User)
 	if strconv.Itoa(session.ID) != c.Param("user_id") {
 		return helper.HTTPErrorUnauthorized
 	}
@@ -125,7 +107,7 @@ func (that *UsersHandler) update(c echo.Context) error {
 	if _, err := conn.Where("id = ?", actualUser.ID).Update(actualUser); err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
-	return c.String(http.StatusNoContent, "")
+	return helper.HTTPStatusNotContent
 }
 
 // AttachUsers s
@@ -133,6 +115,5 @@ func AttachUsers(g *echo.Group) {
 	u := &UsersHandler{}
 	g.GET("", u.find)
 	g.GET("/:user_id", u.get)
-	g.PUT("", u.add)
 	g.PATCH("/:user_id", u.update)
 }

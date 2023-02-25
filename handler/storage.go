@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
@@ -12,6 +13,7 @@ import (
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/juliotorresmoreno/SpecialistTalk/services"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/minio/minio-go/v7"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -19,17 +21,10 @@ import (
 type StorageHandler struct{}
 
 func AttachStorage(g *echo.Group) {
-	//conf := configs.GetConfig().Minio
 	u := &StorageHandler{}
 
-	//g.GET("/:filename", u.get)
 	g.POST("", u.add)
 	g.GET("/:filename", u.getFromHTTP)
-
-	/*
-		url, _ := url.Parse("http://localhost:8000/" + conf.Bucket)
-		targets := []*middleware.ProxyTarget{{URL: url}}
-		g.Use(middleware.Proxy(middleware.NewRoundRobinBalancer(targets)))*/
 }
 
 type POSTAddPayload struct {
@@ -91,7 +86,16 @@ func (u *StorageHandler) add(c echo.Context) error {
 	return c.JSON(200, info)
 }
 
-func (u *StorageHandler) get(c echo.Context) error {
+// Una alternativa mas
+func (u *StorageHandler) Reverse() echo.MiddlewareFunc {
+	conf := configs.GetConfig().Minio
+	url, _ := url.Parse(conf.Url + conf.Bucket)
+	targets := []*middleware.ProxyTarget{{URL: url}}
+	return middleware.Proxy(middleware.NewRoundRobinBalancer(targets))
+}
+
+// Una alternativa mas
+func (u *StorageHandler) Get(c echo.Context) error {
 	conf := configs.GetConfig().Minio
 	minioCli, err := services.NewMinioClient()
 	if err != nil {

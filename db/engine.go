@@ -53,6 +53,17 @@ func (e *Engine) NewSession() *Session {
 	}
 }
 
+func (e *Engine) NewSessionFree() *Session {
+	return &Session{
+		user:                nil,
+		permisionQueryRead:  "",
+		permisionQueryWrite: "",
+		limit:               e.limit,
+		skip:                e.skip,
+		Session:             e.Engine.NewSession(),
+	}
+}
+
 func (e *Engine) Where(query interface{}, args ...interface{}) *Session {
 	return e.NewSession().Where(query, args...)
 }

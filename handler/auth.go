@@ -1,10 +1,8 @@
 package handler
 
 import (
-	"math/rand"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 	"github.com/juliotorresmoreno/SpecialistTalk/db"
@@ -17,7 +15,6 @@ import (
 type AuthHandler struct {
 }
 
-// POSTLoginPayload s
 type POSTSingUpPayload struct {
 	Email    string `yaml:"email"   `
 	Password string `yaml:"password"`
@@ -84,7 +81,6 @@ func (el *AuthHandler) POSTSingUp(c echo.Context) error {
 	return helper.MakeSession(c, u)
 }
 
-// POSTLoginPayload s
 type POSTLoginPayload struct {
 	Email    string `yaml:"email"`
 	Password string `yaml:"password"`
@@ -118,19 +114,8 @@ func (el *AuthHandler) POSTLogin(c echo.Context) error {
 	return helper.MakeSession(c, u)
 }
 
-// CredentialsRecovery s
 type CredentialsRecovery struct {
 	Email string
-}
-
-var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
-
-func StringWithCharset(length int, charset string) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
-	}
-	return string(b)
 }
 
 func (el *AuthHandler) POSTRecovery(c echo.Context) error {
@@ -145,7 +130,7 @@ func (el *AuthHandler) POSTRecovery(c echo.Context) error {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
-	token := StringWithCharset(40, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz")
+	token := helper.StringWithAlphanumCharset(40)
 	if p.Email == "" {
 		return helper.MakeHTTPError(http.StatusNotAcceptable, "email is required")
 	}
@@ -159,7 +144,6 @@ func (el *AuthHandler) POSTRecovery(c echo.Context) error {
 	return c.String(http.StatusNoContent, "")
 }
 
-// CredentialsReset s
 type POSTResetPayload struct {
 	Password string
 	Token    string
@@ -222,7 +206,6 @@ func (that *AuthHandler) GETSession(c echo.Context) error {
 	return c.JSON(200, u)
 }
 
-// AuthHandler s
 func AttachAuth(g *echo.Group) {
 	c := AuthHandler{}
 	g.GET("/session", c.GETSession)

@@ -60,14 +60,10 @@ func (that *ChatsHandler) get(c echo.Context) error {
 
 	messages := make([]model.Message, 0)
 	_ = curr.All(context.Background(), &messages)
-	helper.Reverse(messages)
-
-	if conn, err = db.GetConnectionPool(); err != nil {
-		return helper.MakeHTTPError(http.StatusInternalServerError, err)
-	}
+	messages = helper.Reverse(messages)
 
 	user := &model.User{ID: chat.UserID}
-	if _, err = conn.Get(user); err != nil {
+	if _, err = conn.NewSessionFree().Get(user); err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -117,24 +113,19 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		return helper.HTTPErrorUnauthorized
 	}
 
-	conn, err := db.GetConnectionPool()
+	conf := configs.GetConfig()
+	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	u := &model.User{}
-	ok, err := conn.Where("id = ?", payload.UserID).Get(u)
+	ok, err := conn.NewSessionFree().Where("id = ?", payload.UserID).Get(u)
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 	if !ok {
 		return helper.HTTPErrorNotFound
-	}
-
-	conf := configs.GetConfig()
-	conn, err = db.GetConnectionPoolWithSession(conf.Database, session)
-	if err != nil {
-		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
 	chat := &model.Chat{UserID: u.ID}
@@ -161,7 +152,12 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		if err = chat.Check(); err != nil {
 			return helper.MakeHTTPError(http.StatusInternalServerError, err)
 		}
-		_, _ = conn.InsertOne(chat2)
+		_, _ = conn.NewSessionFree().InsertOne(chat2)
+	} else if chat.Status == model.ChatStatusCreated {
+		chat.Status = model.ChatStatusActive
+		if _, err = conn.Update(chat); err != nil {
+			return helper.MakeHTTPError(http.StatusInternalServerError, err)
+		}
 	}
 
 	SendToClient <- &MessageToClient{

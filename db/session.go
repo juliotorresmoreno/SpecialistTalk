@@ -45,16 +45,22 @@ func (e *Session) SessionWithACL() *xorm.Session {
 	return e.Session
 }
 
+func (e *Session) setOwner(field reflect.Value) {
+	field = field.Elem().FieldByName("Owner")
+	value := field.String()
+	if field.CanSet() && e.user != nil && value == "" {
+		value := reflect.ValueOf(e.user.Username)
+		field.Set(value)
+	}
+}
+
 func (e *Session) Insert(bean ...interface{}) (int64, error) {
 	for _, b := range bean {
 		field := reflect.ValueOf(b)
 		if field.Kind() != reflect.Ptr {
 			field = reflect.ValueOf(&b)
 		}
-		field = field.Elem().FieldByName("Owner")
-		if field.CanSet() && e.user != nil {
-			field.Set(reflect.ValueOf(e.user.Username))
-		}
+		e.setOwner(field)
 	}
 
 	return e.Session.Insert(bean...)
@@ -65,11 +71,7 @@ func (e *Session) InsertOne(bean interface{}) (int64, error) {
 	if field.Kind() != reflect.Ptr {
 		field = reflect.ValueOf(&bean)
 	}
-	field = field.Elem().FieldByName("Owner")
-	if field.CanSet() && e.user != nil {
-		value := reflect.ValueOf(e.user.Username)
-		field.Set(value)
-	}
+	e.setOwner(field)
 	return e.Session.InsertOne(bean)
 }
 

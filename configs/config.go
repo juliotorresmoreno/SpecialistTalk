@@ -56,6 +56,8 @@ type Minio struct {
 type Config struct {
 	Env             string    `json:"env"               yaml:"env"               valid:"required"`
 	Secret          string    `json:"secret"            yaml:"secret"            valid:"required"`
+	OpenIDKey       string    `json:"open_id_key"       yaml:"open_id_key"       valid:"required"`
+	BaseUrl         string    `json:"base_url"          yaml:"base_url"          valid:"required"`
 	Host            string    `json:"host"              yaml:"host"              valid:"required"`
 	Port            string    `json:"port"              yaml:"port"              valid:"required"`
 	ReadBufferSize  int       `json:"read_buffer_size"  yaml:"read_buffer_size"  valid:"required"`
@@ -153,6 +155,8 @@ func loadFromEnv() error {
 
 	p := &Parser{}
 
+	p.String(&conf.BaseUrl, "BASE_URL", "")
+	p.String(&conf.OpenIDKey, "OPENID_KEY", "")
 	p.String(&conf.Host, "HOST", "")
 	p.String(&conf.Port, "PORT", "1323")
 	p.String(&conf.Secret, "SECRET", "123456")

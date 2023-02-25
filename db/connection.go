@@ -10,6 +10,7 @@ import (
 )
 
 func NewEngigne(conf *configs.Database) (*xorm.Engine, error) {
+	var err error
 	dsn := conf.DSN
 	if conf.Driver == "postgres" {
 		dsn, _ = pq.ParseURL(conf.DSN)
