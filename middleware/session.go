@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/juliotorresmoreno/SpecialistTalk/db"
+	"github.com/juliotorresmoreno/SpecialistTalk/helper"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/juliotorresmoreno/SpecialistTalk/services"
 	"github.com/labstack/echo/v4"
@@ -12,10 +13,7 @@ import (
 
 func Session(handler echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		token := c.Request().Header.Get("X-API-Key")
-		if token == "" {
-			token = c.QueryParams().Get("token")
-		}
+		token := helper.GetToken(c)
 		if token == "" {
 			return handler(c)
 		}

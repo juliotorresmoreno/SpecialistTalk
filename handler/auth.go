@@ -8,6 +8,7 @@ import (
 	"github.com/juliotorresmoreno/SpecialistTalk/db"
 	"github.com/juliotorresmoreno/SpecialistTalk/helper"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
+	"github.com/juliotorresmoreno/SpecialistTalk/services"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -206,8 +207,22 @@ func (that *AuthHandler) GETSession(c echo.Context) error {
 	return c.JSON(200, u)
 }
 
+func (that *AuthHandler) DELETESession(c echo.Context) error {
+	_session := c.Get("session")
+	if _session == nil {
+		return helper.HTTPStatusNotContent
+	}
+
+	token := helper.GetToken(c)
+	redisCli := services.GetPoolRedis()
+	_ = redisCli.Del(token)
+
+	return helper.HTTPStatusNotContent
+}
+
 func AttachAuth(g *echo.Group) {
 	c := AuthHandler{}
+	g.DELETE("/session", c.DELETESession)
 	g.GET("/session", c.GETSession)
 	g.POST("/sing-up", c.POSTSingUp)
 	g.POST("/sing-in", c.POSTLogin)

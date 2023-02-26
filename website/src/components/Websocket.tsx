@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import config from '../config'
 import { wsHandlers } from '../handlers'
 import { store } from '../store'
+import { useAppSelector } from '../store/hooks'
 
 type WebsocketProps = {} & React.PropsWithChildren
 
@@ -13,9 +14,9 @@ const hClose = wsHandlers.filter((x) => x.event === 'close')
 const Websocket: React.FC<WebsocketProps> = ({ children }) => {
   let unmount = false
   let socket: WebSocket | null = null
+  const session = useAppSelector((state) => state.auth.session)
 
   const reconnect = () => {
-    const session = store.getState().auth.session
     if (!session || !session.token) return
     if (socket !== null) return
     socket = new WebSocket(config.wsUrl + '?token=' + session?.token)

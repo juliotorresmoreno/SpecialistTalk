@@ -26,7 +26,8 @@ type MessageToGroup struct {
 }
 
 var register = make(chan *client)
-var remove = make(chan *client)
+var removeClient = make(chan *client)
+var removeUser = make(chan string)
 var SendToClient = make(chan *MessageToClient)
 var SendToGroup = make(chan *MessageToGroup)
 
@@ -64,6 +65,10 @@ func dispatchMessageToGroup(code string, data interface{}) {
 			},
 		},
 	}
+}
+
+func dispatchDisconnect(username string) {
+
 }
 
 type HandlerWS struct {
@@ -131,10 +136,20 @@ func (u *HandlerWS) Register() {
 				clients[username] = make(map[*client]bool)
 			}
 			clients[username][c] = true
-		case c := <-remove:
+		case c := <-removeUser:
+			username := c
+
+			if slot, ok := clients[username]; ok {
+				for client := range slot {
+					_ = client.conn.Close()
+				}
+				delete(clients, username)
+			}
+		case c := <-removeClient:
 			username := c.username
 
 			if slot, ok := clients[username]; ok {
+				_ = c.conn.Close()
 				delete(slot, c)
 			}
 		case c := <-SendToClient:
@@ -172,7 +187,7 @@ func readWS(cli *client) {
 	for {
 		_, _, err := cli.conn.ReadMessage()
 		if err != nil {
-			remove <- cli
+			removeClient <- cli
 			_ = cli.conn.Close()
 			break
 		}

@@ -99,3 +99,11 @@ func (u *RegisterHTTPResponseWriter) Push() {
 	u.w.WriteHeader(u.StatusCode)
 	u.w.Write(u.Buffer.Bytes())
 }
+
+func GetToken(c echo.Context) string {
+	token := c.Request().Header.Get("X-API-Key")
+	if token == "" {
+		token = c.QueryParams().Get("token")
+	}
+	return token
+}
