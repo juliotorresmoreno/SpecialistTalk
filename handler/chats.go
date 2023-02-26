@@ -46,10 +46,9 @@ func (that *ChatsHandler) get(c echo.Context) error {
 	}
 
 	chat.Notifications = 0
-	_, _ = conn.Cols("notifications").
-		Where("id = ?", chat.ID).
-		Update(chat)
-	dispatchContactsUpdate(chat.Owner)
+	if _, err = conn.Cols("notifications").Where("id = ?", chat.ID).Update(chat); err != nil {
+		dispatchContactsUpdate(chat.Owner)
+	}
 
 	mongoCli, err := services.GetPoolMongo()
 	if err != nil {

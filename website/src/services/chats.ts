@@ -10,6 +10,13 @@ export function useGet(id: string) {
   return { isLoading, error, get }
 }
 
+export function useFind() {
+  const url = config.baseUrl + '/chats'
+  const { get, error, isLoading } = api.useGetData(url)
+
+  return { isLoading, error, get }
+}
+
 export function useAdd() {
   const url = config.baseUrl + '/chats'
   const { error, isLoading, add } = api.useAdd<{ user_id: number }, IChat>(url)

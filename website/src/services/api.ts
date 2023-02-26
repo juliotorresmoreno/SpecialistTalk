@@ -98,13 +98,17 @@ export function useUpdate<Payload = any, Response = any>(
 
 export function useRemove(url: string, opts?: ApiOpts) {
   const _url = url
-  const { error, isLoading, apply } = useApi<WithId, void>('DELETE', _url, opts)
+  const { error, isLoading, apply } = useApi<WithId | null, void>(
+    'DELETE',
+    _url,
+    opts
+  )
 
   return {
     isLoading,
     error,
-    remove: async (id: string | number) => {
-      await apply({ id })
+    remove: async (id: string | number | null) => {
+      return apply(id !== null ? { id } : null)
     },
   }
 }

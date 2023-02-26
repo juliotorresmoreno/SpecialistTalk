@@ -4,9 +4,9 @@ import { IChat } from '../models/chat'
 import { FileBase64 } from '../models/files'
 import * as api from './api'
 
-export function useGet(id: string) {
+export function useGet(code: string) {
   const url = config.baseUrl + '/messages/'
-  const { get, error, isLoading } = api.useGetData(url + id)
+  const { get, error, isLoading } = api.useGetData(url + code)
 
   return { isLoading, error, get }
 }

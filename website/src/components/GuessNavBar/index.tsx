@@ -3,19 +3,16 @@ import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
 import { Link } from 'react-router-dom'
-import authSlice from '../../features/auth'
-import { useAppDispatch } from '../../store/hooks'
+import { useLogout } from '../../services/auth'
 import './style.css'
 
 type NavBarProps = {} & React.PropsWithChildren
 
 const GuessNavBar: React.FC<NavBarProps> = (props) => {
-  const dispatch = useAppDispatch()
   const toggleBtnRef = useRef<HTMLButtonElement | null>()
+  const { apply } = useLogout()
 
-  const logout = () => {
-    dispatch(authSlice.actions.logout())
-  }
+  const logout = () => apply()
   return (
     <Navbar collapseOnSelect expand="lg" bg="purple" variant="dark">
       <Container>
