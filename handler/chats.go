@@ -45,6 +45,12 @@ func (that *ChatsHandler) get(c echo.Context) error {
 		return helper.HTTPErrorUnauthorized
 	}
 
+	chat.Notifications = 0
+	_, _ = conn.Cols("notifications").
+		Where("id = ?", chat.ID).
+		Update(chat)
+	dispatchContactsUpdate(chat.Owner)
+
 	mongoCli, err := services.GetPoolMongo()
 	if err != nil {
 		return helper.HTTPErrorInternalServerError
@@ -62,7 +68,7 @@ func (that *ChatsHandler) get(c echo.Context) error {
 	_ = curr.All(context.Background(), &messages)
 	messages = helper.Reverse(messages)
 
-	user := &model.User{ID: chat.UserID}
+	user := &model.User{Username: chat.ToUserName}
 	if _, err = conn.NewSessionFree().Get(user); err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
@@ -119,8 +125,8 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
 
-	u := &model.User{}
-	ok, err := conn.NewSessionFree().Where("id = ?", payload.UserID).Get(u)
+	u := &model.User{ID: payload.UserID}
+	ok, err := conn.NewSessionFree().Get(u)
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}
@@ -128,7 +134,7 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		return helper.HTTPErrorNotFound
 	}
 
-	chat := &model.Chat{UserID: u.ID}
+	chat := &model.Chat{ToUserName: u.Username}
 	ok, err = conn.Get(chat)
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
@@ -138,21 +144,23 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		chat.Code = token
 		chat.Name = u.Name + " " + u.LastName
 		chat.Owner = session.Username
+		chat.ToUserName = u.Username
 		chat.Status = model.ChatStatusActive
 		if err = chat.Check(); err != nil {
 			return helper.MakeHTTPError(http.StatusInternalServerError, err)
 		}
 		_, _ = conn.InsertOne(chat)
 
-		chat2 := &model.Chat{UserID: session.ID}
-		chat2.Code = token
-		chat2.Name = session.Name + " " + session.LastName
-		chat2.Owner = u.Username
-		chat2.Status = model.ChatStatusCreated
+		other_chat := &model.Chat{}
+		other_chat.Code = token
+		other_chat.Name = session.Name + " " + session.LastName
+		other_chat.Owner = u.Username
+		other_chat.ToUserName = session.Username
+		other_chat.Status = model.ChatStatusCreated
 		if err = chat.Check(); err != nil {
 			return helper.MakeHTTPError(http.StatusInternalServerError, err)
 		}
-		_, _ = conn.NewSessionFree().InsertOne(chat2)
+		_, _ = conn.NewSessionFree().InsertOne(other_chat)
 	} else if chat.Status == model.ChatStatusCreated {
 		chat.Status = model.ChatStatusActive
 		if _, err = conn.Update(chat); err != nil {
@@ -160,12 +168,7 @@ func (that *ChatsHandler) add(c echo.Context) error {
 		}
 	}
 
-	SendToClient <- &MessageToClient{
-		Username: session.Username,
-		Notification: &model.Notification{
-			Type: "contacts_update",
-		},
-	}
+	dispatchContactsUpdate(session.Username)
 
 	return c.JSON(200, chat)
 }

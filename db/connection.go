@@ -2,12 +2,16 @@ package db
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/juliotorresmoreno/SpecialistTalk/configs"
 	"github.com/juliotorresmoreno/SpecialistTalk/model"
 	"github.com/lib/pq"
 	"xorm.io/xorm"
+	"xorm.io/xorm/caches"
 )
+
+var maxElementSize = int(math.Pow(2, 16))
 
 func NewEngigne(conf *configs.Database) (*xorm.Engine, error) {
 	var err error
@@ -21,6 +25,10 @@ func NewEngigne(conf *configs.Database) (*xorm.Engine, error) {
 	}
 	conn.SetMaxOpenConns(conf.MaxOpenConns)
 	conn.SetMaxIdleConns(conf.MaxIdleConns)
+
+	cacher := caches.NewLRUCacher(caches.NewMemoryStore(), maxElementSize)
+	conn.SetDefaultCacher(cacher)
+
 	return conn, err
 }
 

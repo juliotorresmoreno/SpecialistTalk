@@ -17,6 +17,7 @@ type args<T> = {
   skipper?: (id: string) => T | null
   callback: (data: T) => void
   withAuth: boolean
+  withConfig?: (id: string) => { limit: number; skip: number }
 }
 
 const withDataById = function <T = any, S = any>({

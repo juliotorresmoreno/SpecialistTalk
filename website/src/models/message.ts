@@ -1,3 +1,5 @@
+import { IChat } from './chat'
+
 export interface Message {
   id: string
   message: string
@@ -6,12 +8,14 @@ export interface Message {
   created_at: string
 }
 
-export interface Payload {
-  code: string
-  data: Message
-}
-
 export interface MessageEvent {
   type: 'message'
-  payload: Payload
+  payload: {
+    code: string
+    data: Message
+  }
+}
+export interface UpdateContactEvent {
+  type: 'contacts_update'
+  payload: IChat[]
 }

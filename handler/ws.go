@@ -32,6 +32,40 @@ var SendToGroup = make(chan *MessageToGroup)
 
 var clients = map[string]map[*client]bool{}
 
+func dispatchContactsUpdate(username string) {
+	conn, err := db.GetConnectionPool()
+	if err != nil {
+		return
+	}
+
+	chats := make([]model.Chat, 0)
+	err = conn.Where("owner = ?", username).Find(&chats)
+	if err != nil {
+		return
+	}
+
+	SendToClient <- &MessageToClient{
+		Username: username,
+		Notification: &model.Notification{
+			Type:    "contacts_update",
+			Payload: chats,
+		},
+	}
+}
+
+func dispatchMessageToGroup(code string, data interface{}) {
+	SendToGroup <- &MessageToGroup{
+		Code: code,
+		Notification: &model.Notification{
+			Type: "message",
+			Payload: map[string]interface{}{
+				"code": code,
+				"data": data,
+			},
+		},
+	}
+}
+
 type HandlerWS struct {
 	Upgrader *websocket.Upgrader
 }

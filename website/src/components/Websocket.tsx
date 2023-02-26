@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import config from '../config'
 import { wsHandlers } from '../handlers'
-import { useAppSelector } from '../store/hooks'
+import { store } from '../store'
 
 type WebsocketProps = {} & React.PropsWithChildren
 
@@ -11,12 +11,13 @@ const hError = wsHandlers.filter((x) => x.event === 'error')
 const hClose = wsHandlers.filter((x) => x.event === 'close')
 
 const Websocket: React.FC<WebsocketProps> = ({ children }) => {
-  const session = useAppSelector((state) => state.auth.session)
   let unmount = false
   let socket: WebSocket | null = null
 
   const reconnect = () => {
-    if (socket !== null || !session?.token) return
+    const session = store.getState().auth.session
+    if (!session || !session.token) return
+    if (socket !== null) return
     socket = new WebSocket(config.wsUrl + '?token=' + session?.token)
     socket.addEventListener('open', function (evt) {
       let _socket = evt.currentTarget as WebSocket
@@ -45,18 +46,18 @@ const Websocket: React.FC<WebsocketProps> = ({ children }) => {
       hError.forEach(({ handler }) => handler())
     })
 
-    socket.addEventListener('close', function (evt) {
+    socket.addEventListener('close', function () {
       if (unmount) return
 
       socket = null
-      // setTimeout(() => reconnect(), 3000)
+      setTimeout(() => reconnect(), 3000)
 
       hClose.forEach(({ handler }) => handler())
     })
   }
 
   useEffect(() => {
-    // reconnect()
+    reconnect()
     return () => {
       unmount = true
       socket?.close()

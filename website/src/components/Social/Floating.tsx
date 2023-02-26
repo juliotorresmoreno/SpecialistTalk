@@ -2,10 +2,12 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
 import config from '../../config'
+import chatsSlice from '../../features/chats'
 import withData from '../../hoc/withData'
 import useSearch from '../../hooks/useSearch'
 import { IChat } from '../../models/chat'
 import { useAdd } from '../../services/chats'
+import { store } from '../../store'
 import { useAppSelector } from '../../store/hooks'
 import Ads from '../Ads'
 import Input from '../Input'
@@ -38,13 +40,13 @@ type _FloatingProps = {
   payload: IChat[]
 }
 
-const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
-  const notifications = useAppSelector((state) => state.chats.notifications)
+const _Floating: React.FC<_FloatingProps> = () => {
   const url = '/users'
   const [ignore, setIgnore] = useState<any>({})
   const [search, setSearch, result] = useSearch(url)
   const navigate = useNavigate()
   const { add } = useAdd()
+  const contacts = useAppSelector((state) => state.chats.contacts)
 
   const users =
     result.length > 0
@@ -57,6 +59,7 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
               {el.getFullName()}
             </>
           ),
+          notifications: 0,
           handler: () => {
             add({ user_id: el.id })
               .then(async (chat) => {
@@ -69,7 +72,7 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
               .catch((err: Error) => {})
           },
         }))
-      : payload.map((el) => ({
+      : contacts.map((el) => ({
           id: el.code,
           name: (
             <>
@@ -78,6 +81,7 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
               {el.name}
             </>
           ),
+          notifications: el.notifications,
           handler: () => {
             navigate('/chats/' + el.code)
           },
@@ -91,7 +95,7 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
           if (ignore[contact.id]) return null
           return (
             <Contact
-              notification={notifications[contact.id]}
+              notification={contact.notifications > 0}
               key={contact.id}
               onClick={contact.handler}
             >
@@ -104,12 +108,17 @@ const _Floating: React.FC<_FloatingProps> = ({ payload }) => {
   )
 }
 
+type FloatingProps = {}
+
 const url = config.baseUrl + '/chats'
-const Floating = withData({
+const Floating = withData<FloatingProps, IChat[]>({
   WrappedComponent: _Floating,
   withAuth: true,
   url,
   FallbackComponent: Ads,
+  callback(data) {
+    store.dispatch(chatsSlice.actions.updateContacts(data))
+  },
 })
 
 export default Floating

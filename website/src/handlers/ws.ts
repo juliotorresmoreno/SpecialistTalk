@@ -1,6 +1,6 @@
 import chatsSlice from '../features/chats'
 import messagesSlice from '../features/messages'
-import { MessageEvent } from '../models/message'
+import { MessageEvent, UpdateContactEvent } from '../models/message'
 import { store } from '../store'
 import HandlerManager from './handler'
 
@@ -17,7 +17,6 @@ const handlers = new HandlerManager(
     handler: function (data: MessageEvent) {
       const state = store.getState()
       const code = data.payload.code
-      const user = state.auth.session?.user
       const message = data.payload.data
       const chat = state.messages.notifications[code]
       const nchat = { ...chat }
@@ -29,9 +28,13 @@ const handlers = new HandlerManager(
           chat: nchat,
         })
       )
-      if (data.payload.data.from != user?.id) {
-        store.dispatch(chatsSlice.actions.addNotification(code))
-      }
+    },
+  },
+  {
+    event: 'message',
+    type: 'contacts_update',
+    handler(data: UpdateContactEvent) {
+      store.dispatch(chatsSlice.actions.updateContacts(data.payload))
     },
   },
   {

@@ -6,18 +6,18 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-// Chat s
 type Chat struct {
-	ID        int       `xorm:"id BIGSERIAL not null autoincr pk" valid:""                     json:"id"`
-	UserID    int       `xorm:"user_id BIGINT not null"           valid:"required"             json:"user_id"`
-	Name      string    `xorm:"name varchar(50) not null"         valid:"required,name"        json:"name"`
-	Code      string    `xorm:"code varchar(50) not null index"   valid:"required"             json:"code"`
-	Status    string    `xorm:"status varchar(50) not null"       valid:"required,chat_status" json:"status"`
-	Owner     string    `xorm:"owner varchar(100) not null index" valid:"required"             json:"-"`
-	CreatedAt time.Time `xorm:"created_at created"                                             json:"-"`
-	UpdatedAt time.Time `xorm:"updated_at updated"                                             json:"-"`
-	DeletedAt time.Time `xorm:"deleted_at deleted"                                             json:"-"`
-	Version   int       `xorm:"bigint version"                                                 json:"-"`
+	ID            int       `xorm:"id BIGSERIAL not null autoincr pk"    json:"id"            valid:""`
+	ToUserName    string    `xorm:"to_user_name varchar(100) not null"   json:"to_user_name"  valid:"required"`
+	Name          string    `xorm:"name varchar(50) not null"            json:"name"          valid:"required,name"`
+	Code          string    `xorm:"code varchar(50) not null index"      json:"code"          valid:"required"`
+	Status        string    `xorm:"status varchar(50) not null"          json:"status"        valid:"required,chat_status"`
+	Notifications int       `xorm:"notifications int not null default 0" json:"notifications" valid:""`
+	Owner         string    `xorm:"owner varchar(100) not null index"    json:"-"             valid:"required"`
+	CreatedAt     time.Time `xorm:"created_at created"                   json:"-"`
+	UpdatedAt     time.Time `xorm:"updated_at updated"                   json:"-"`
+	DeletedAt     time.Time `xorm:"deleted_at deleted"                   json:"-"`
+	Version       int       `xorm:"bigint version"                       json:"-"`
 }
 
 const ChatStatusActive = "active"

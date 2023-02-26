@@ -6,5 +6,6 @@ export type IChat = {
   name: string
   code: string
   user: IUser
+  notifications: number
   messages: Message[]
 }

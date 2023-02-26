@@ -44,11 +44,10 @@ const MessagesPage = withDataById<any, IChat>({
   WrappedComponent: _MessagesPage,
   url,
   withAuth: true,
-  skipper(id) {
-    const notifications = store.getState().messages.notifications
-    return notifications[id] ?? null
-  },
   callback(data) {
+    const notifications = store.getState().messages.notifications
+    if (notifications[data.id]) return
+
     data.messages = data.messages.sort((x, y) => {
       const x1 = moment(x.created_at).unix()
       const y1 = moment(y.created_at).unix()

@@ -48,6 +48,28 @@ type Attachment struct {
 	Body string `json:"body" valid:"required"`
 }
 
+func (that *MessagesHandler) updateNotificationChat(code string, username string) error {
+	conn, err := db.GetConnectionPool()
+	if err != nil {
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
+	}
+	chats := make([]model.Chat, 0)
+	err = conn.Where("code = ? and owner <> ?", code, username).Find(&chats)
+	if err != nil {
+		return helper.MakeHTTPError(http.StatusInternalServerError, err)
+	}
+
+	for _, chat := range chats {
+		chat.Notifications += 1
+		_, _ = conn.Cols("notifications").
+			Where("id = ?", chat.ID).
+			Update(chat)
+		dispatchContactsUpdate(chat.Owner)
+	}
+
+	return nil
+}
+
 type POSTMessagesAddPayload struct {
 	Code        string       `json:"code"        valid:"required"`
 	Message     string       `json:"message"     valid:"required"`
@@ -74,6 +96,9 @@ func (that *MessagesHandler) add(c echo.Context) error {
 	} else if !ok {
 		return helper.HTTPErrorNotFound
 	}
+	if err = that.updateNotificationChat(chat.Code, session.Username); err != nil {
+		return err
+	}
 
 	mongoCli, err := services.GetPoolMongo()
 	if err != nil {
@@ -97,16 +122,7 @@ func (that *MessagesHandler) add(c echo.Context) error {
 		return helper.HTTPErrorInternalServerError
 	}
 
-	SendToGroup <- &MessageToGroup{
-		Code: payload.Code,
-		Notification: &model.Notification{
-			Type: "message",
-			Payload: map[string]interface{}{
-				"code": payload.Code,
-				"data": data,
-			},
-		},
-	}
+	dispatchMessageToGroup(payload.Code, data)
 
 	return helper.HTTPStatusNotContent
 }

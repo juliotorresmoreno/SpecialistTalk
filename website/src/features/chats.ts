@@ -1,19 +1,20 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { IChat } from '../models/chat'
 
 export type ChatsState = {
-  notifications: { [x: string]: true }
+  contacts: IChat[]
 }
 
 const initialState: ChatsState = {
-  notifications: {},
+  contacts: [],
 }
 
 const chatsSlice = createSlice({
   name: 'chats',
   initialState,
   reducers: {
-    addNotification(state, action: PayloadAction<string>) {
-      state.notifications[action.payload] = true
+    updateContacts(state, { payload }: PayloadAction<IChat[]>) {
+      state.contacts = payload
     },
   },
 })
