@@ -68,6 +68,12 @@ func dispatchMessageToGroup(code string, data interface{}) {
 }
 
 func dispatchDisconnect(username string) {
+	SendToClient <- &MessageToClient{
+		Username: username,
+		Notification: &model.Notification{
+			Type: "disconnect",
+		},
+	}
 	removeUser <- username
 }
 
