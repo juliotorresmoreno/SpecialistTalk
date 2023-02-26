@@ -16,7 +16,6 @@ import (
 
 type ChatsHandler struct{}
 
-// AttachChats s
 func AttachChats(g *echo.Group) {
 	u := &ChatsHandler{}
 	g.GET("", u.find)
@@ -55,11 +54,14 @@ func (that *ChatsHandler) get(c echo.Context) error {
 		return helper.HTTPErrorInternalServerError
 	}
 
+	pagination := helper.Paginate(c)
+	skip := int64(pagination.Skip)
+	limit := int64(pagination.Limit)
 	collectionName := "conversation_" + code
 	collection := mongoCli.Database(conf.Mongo.ConversationDB).Collection(collectionName)
-	limit := int64(10)
 	curr, _ := collection.Find(context.Background(), map[string]interface{}{}, &options.FindOptions{
 		Limit: &limit,
+		Skip:  &skip,
 		Sort:  bson.D{{Key: "created_at", Value: -1}},
 	})
 
@@ -88,14 +90,10 @@ func (that *ChatsHandler) find(c echo.Context) error {
 		return err
 	}
 
-	conf := configs.GetConfig()
-	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
-	if err != nil {
-		return helper.MakeHTTPError(http.StatusInternalServerError, err)
-	}
+	crud := db.NewCrud(session)
 
 	chats := make([]model.Chat, 0)
-	err = conn.Find(&chats)
+	err = crud.Find(&chats, model.FindOptions{})
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)
 	}

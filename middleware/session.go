@@ -30,6 +30,8 @@ func Session(handler echo.HandlerFunc) echo.HandlerFunc {
 					u.ValidPassword = ""
 					c.Set("session", u)
 					redisCli.Set(token, r, 24*time.Hour)
+				} else {
+					redisCli.Del(token)
 				}
 			}
 		}

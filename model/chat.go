@@ -16,7 +16,7 @@ type Chat struct {
 	Owner         string    `xorm:"owner varchar(100) not null index"    json:"-"             valid:"required"`
 	CreatedAt     time.Time `xorm:"created_at created"                   json:"-"`
 	UpdatedAt     time.Time `xorm:"updated_at updated"                   json:"-"`
-	DeletedAt     time.Time `xorm:"deleted_at deleted"                   json:"-"`
+	DeletedAt     time.Time `xorm:"deleted_at deleted default null"      json:"-"`
 	Version       int       `xorm:"bigint version"                       json:"-"`
 }
 

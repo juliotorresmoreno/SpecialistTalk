@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import styled from 'styled-components'
 import config from '../../config'
 import chatsSlice from '../../features/chats'
@@ -47,6 +47,9 @@ const _Floating: React.FC<_FloatingProps> = () => {
   const navigate = useNavigate()
   const { add } = useAdd()
   const contacts = useAppSelector((state) => state.chats.contacts)
+  const location = useLocation()
+  const path = location.pathname.split('?')[0].split('/')
+  const code = path[1] === 'chats' ? path[2] : ''
 
   const users =
     result.length > 0
@@ -77,8 +80,7 @@ const _Floating: React.FC<_FloatingProps> = () => {
           name: (
             <>
               <span className="material-symbols-outlined">person</span>
-              &nbsp;
-              {el.name}
+              &nbsp;{el.name}
             </>
           ),
           notifications: el.notifications,
@@ -91,15 +93,15 @@ const _Floating: React.FC<_FloatingProps> = () => {
     <>
       <InputSearch type="text" value={search} onChange={setSearch} />
       <ContactsContainer>
-        {users.map((contact) => {
-          if (ignore[contact.id]) return null
+        {users.map(({ id, notifications, name, handler }) => {
+          if (ignore[id]) return null
           return (
             <Contact
-              notification={contact.notifications > 0}
-              key={contact.id}
-              onClick={contact.handler}
+              notification={notifications > 0 && id !== code}
+              key={'contact-' + id}
+              onClick={handler}
             >
-              {contact.name}
+              {name}
             </Contact>
           )
         })}

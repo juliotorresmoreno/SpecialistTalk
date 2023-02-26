@@ -13,7 +13,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Paginate(c echo.Context) (int, int) {
+type Pagination struct {
+	Skip    int
+	Limit   int
+	OrderBy string
+}
+
+func Paginate(c echo.Context) Pagination {
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 	skip, _ := strconv.Atoi(c.QueryParam("skip"))
 	if limit == 0 {
@@ -22,8 +28,9 @@ func Paginate(c echo.Context) (int, int) {
 	if limit > 100 {
 		limit = 100
 	}
+	orderBy := c.QueryParam("order_by")
 
-	return limit, skip
+	return Pagination{Skip: skip, Limit: limit, OrderBy: orderBy}
 }
 
 func ValidateSession(c echo.Context) (*model.User, error) {

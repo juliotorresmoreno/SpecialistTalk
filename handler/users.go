@@ -28,7 +28,7 @@ func (that *UsersHandler) find(c echo.Context) error {
 	}
 	users := make([]model.User, 0)
 
-	limit, skip := helper.Paginate(c)
+	pagination := helper.Paginate(c)
 	q := c.QueryParam("q")
 	if q == "" {
 		return c.JSON(http.StatusOK, users)
@@ -38,7 +38,7 @@ func (that *UsersHandler) find(c echo.Context) error {
 	err = conn.NewSessionFree().
 		Where("id <> ?", session.ID).
 		And(query).
-		Limit(limit, skip).
+		Limit(pagination.Limit, pagination.Skip).
 		Find(&users)
 	if err != nil {
 		return helper.MakeHTTPError(http.StatusInternalServerError, err)

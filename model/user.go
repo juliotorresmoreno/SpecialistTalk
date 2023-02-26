@@ -32,6 +32,7 @@ type User struct {
 	Owner         string    `xorm:"owner varchar(100) not null index"     valid:"required"    json:"-"`
 	CreatedAt     time.Time `xorm:"created_at created"                    valid:""            json:"-"`
 	UpdatedAt     time.Time `xorm:"updated_at updated"                    valid:""            json:"-"`
+	DeletedAt     time.Time `xorm:"deleted_at deleted default null"       valid:""            json:"-"`
 	Version       int       `xorm:"bigint version"                        valid:""            json:"-"`
 }
 
