@@ -1,3 +1,4 @@
+import authSlice from '../features/auth'
 import chatsSlice from '../features/chats'
 import messagesSlice from '../features/messages'
 import { MessageEvent, UpdateContactEvent } from '../models/message'
@@ -35,6 +36,13 @@ const handlers = new HandlerManager(
     type: 'contacts_update',
     handler(data: UpdateContactEvent) {
       store.dispatch(chatsSlice.actions.updateContacts(data.payload))
+    },
+  },
+  {
+    event: 'message',
+    type: 'disconnect',
+    handler() {
+      store.dispatch(authSlice.actions.logout())
     },
   },
   {
