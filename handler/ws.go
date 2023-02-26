@@ -68,7 +68,7 @@ func dispatchMessageToGroup(code string, data interface{}) {
 }
 
 func dispatchDisconnect(username string) {
-
+	removeUser <- username
 }
 
 type HandlerWS struct {

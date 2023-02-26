@@ -187,12 +187,11 @@ func (el *AuthHandler) POSTReset(c echo.Context) error {
 }
 
 func (that *AuthHandler) GETSession(c echo.Context) error {
-	_session := c.Get("session")
-	if _session == nil {
+	session, err := helper.ValidateSession(c)
+	if err != nil {
 		return helper.HTTPErrorUnauthorized
 	}
 
-	session := _session.(*model.User)
 	conf := configs.GetConfig()
 	conn, err := db.GetConnectionPoolWithSession(conf.Database, session)
 	if err != nil {
@@ -208,14 +207,16 @@ func (that *AuthHandler) GETSession(c echo.Context) error {
 }
 
 func (that *AuthHandler) DELETESession(c echo.Context) error {
-	_session := c.Get("session")
-	if _session == nil {
+	session, err := helper.ValidateSession(c)
+	if err != nil {
 		return helper.HTTPStatusNotContent
 	}
 
 	token := helper.GetToken(c)
 	redisCli := services.GetPoolRedis()
 	_ = redisCli.Del(token)
+
+	dispatchDisconnect(session.Username)
 
 	return helper.HTTPStatusNotContent
 }
